@@ -1,0 +1,9 @@
+.SimpleLayout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.MainContent {
+    flex: 1;
+    padding: 20px;
+}

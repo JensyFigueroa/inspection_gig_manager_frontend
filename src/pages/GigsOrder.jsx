@@ -51,9 +51,36 @@ export default function GigsOrder ({user}) {
     }
   };
 
+  const handleOperatorChange = async (gigId, employeeNumber) => {
+      
+    try {
+      await authAxios.put(`/gigs/${gigId}`, {
+        employeeNumber
+      });
+  
+      // Update local state (without reloading the entire page)
+      setGigs(prev =>
+        prev.map(gig =>
+          gig._id === gigId
+            ? { ...gig, employeeNumber }
+            : gig
+        )
+      );
+  
+      toast.success('Operator assigned');
+    } catch (error) {
+      toast.error('Error assigning operator');
+    }
+  };
+  
+
   const customerWK = gigs.find(
   gig => gig.truckNumber === wkorder
 )?.customerName || '';
+
+const salesEng = gigs.find(
+  gig => gig.truckNumber === wkorder
+)?.salesEng || '';
 
    const getStatusBadgeClass = (status) => {
     const classes = {
@@ -252,11 +279,33 @@ export default function GigsOrder ({user}) {
                       {getStatusText(gig.status)}
                     </span>
                   </td>
-                  <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
+
+                  {/* <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
                     <span className="font-body text-sm text-slate-600"   >
                       {operators.map(operator => operator.employeeNumber === gig.employeeNumber && operator.fullName)}
                     </span>                  
+                  </td> */}
+
+                  <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
+                    {user.role === 'lead' ? (
+              
+                      <select className="input-field" value={gig.employeeNumber || ''} onChange={(e) => handleOperatorChange(gig._id, e.target.value)}>
+                          {operators.map(operator => (
+                            <option key={operator.employeeNumber} value={operator.employeeNumber}>
+                              {operator.fullName}
+                            </option>
+                            ))}
+                          </select>
+
+            
+                ) :  <span className="font-body text-sm text-slate-600"   >
+                      {operators.map(operator => operator.employeeNumber === gig.employeeNumber && operator.fullName)}
+                    </span>}
+                  
+                    
+                          
                   </td>
+
                   <td className="p-4 font-body text-sm text-slate-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                     {users.map(user => user._id === gig.inspectorId && user.fullName)}
                   </td>
@@ -343,7 +392,7 @@ export default function GigsOrder ({user}) {
 
       {/* Create/Edit Gig Modal (QC Only) */}
             {user.role === 'qc' && showModal && (
-              <CreateGigModal user={user} wkorder={wkorder} customerWK={customerWK}
+              <CreateGigModal user={user} wkorder={wkorder} customerWK={customerWK} salesEng={salesEng}
                 onClose={() => {
                   setShowModal(false);
                   setEditingGig(null);

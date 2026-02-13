@@ -38,7 +38,6 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
     }
   }, [editingGig]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -103,13 +102,13 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Truck Number *
               </label>
-              <input type="text"
+              {formData.truckNumber === '' && formData.truckNumber.lenght
+              ? <input type="text"
                 value={wkorder}
                 onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
                 className="input-field"
-                disabled/>
-                
-              {/* <input
+                disabled /> 
+              : <input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -119,25 +118,25 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
                 value={formData.truckNumber}
                 onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
                 required
-              /> */}
+              />
+              }
             </div>
 
             <div>
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Customer *
               </label>
-              <input type="text"disabled value={customerWK} className="input-field"
-/>
-
-              {/* <input type="text" disabled value={customerWK} className="input-field"  onChange={() => setFormData({ ...formData, customerName: customerWK?.customerName })} /> */}
-              {/* <input
+              {formData.customerName === '' && formData.customerName.lenght
+              ? <input type="text" disabled value={customerWK} className="input-field"/>
+              : <input
                 type="text"
                 className="input-field"
                 placeholder="e.g: Seminole Rescue"
                 value={formData.customerName}
                 onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
                 required
-              /> */}
+              />
+              }
             </div>            
           </div>
 

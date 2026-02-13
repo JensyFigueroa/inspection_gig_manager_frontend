@@ -35,9 +35,6 @@ const gigsByTruck = flatGigs.reduce((acc, gig) => {
 
 const uniqueGigs = Object.values(gigsByTruck);
 
-console.log(gigsByTruck)
-
-
 
     return(
         uniqueGigs.map(gig => (

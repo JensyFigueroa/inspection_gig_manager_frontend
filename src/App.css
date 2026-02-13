@@ -1,3 +1,5 @@
+
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -96,7 +98,7 @@
 .input-field:focus {
   outline: none;
   background-color: white;
-  border-color: #FF5722;
+  border-color: #ff1313;
 }
 
 .table-container {
@@ -173,7 +175,7 @@
 }
 
 .sidebar-link.active {
-  background-color: #FF5722;
+  background-color: #ff1313;
   color: white;
 }
 

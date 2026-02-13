@@ -3,18 +3,21 @@ import { authAxios } from '../App';
 import { toast } from 'sonner';
 import { X } from 'lucide-react';
 import PhotoUploader from './PhotoUploader';
+import { useNavigate } from 'react-router-dom';
 
-export default function CreateGigModal({ onClose, onSuccess, inspectors, editingGig, user }) {
+export default function CreateGigModal({ onClose, onSuccess, editingGig, user, wkorder, customerWK, salesEng}) {
+      const navigate = useNavigate();
 
   const dateNow = new Date()
 
   const [formData, setFormData] = useState({
     station: '',
     description: '',
-    truckNumber: '', 
+    truckNumber: wkorder !== '' ? wkorder : '', 
+    customerName: customerWK !== '' ? customerWK : '',
+    salesEng: salesEng !== '' ? salesEng : '',
     status: 'pending',
-    inspectorId: '',
-    employeeNumber: 'Unassigned',
+    employeeNumber: 100000,
     photos: []
   });
   const [loading, setLoading] = useState(false);
@@ -25,6 +28,8 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
         station: editingGig.station,
         description: editingGig.description,
         truckNumber: editingGig.truckNumber || '',
+        customerName: editingGig.customerName || '',
+        salesEng: editingGig.salesEng || '',
         status: editingGig.status,
         inspectorId: editingGig.inspectorId || '',
         employeeNumber: editingGig.employeeNumber || 'Unassigned',
@@ -46,13 +51,15 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
       };
 
       if (editingGig) {
-        await authAxios.put(`/gigs/${editingGig._id}`, payload);
+        const res = await authAxios.put(`/gigs/${editingGig._id}`, payload);
         toast.success('Updated gig');
+        onSuccess(res.data);
       } else {
-        await authAxios.post('/gigs', payload);
+        const res = await authAxios.post('/gigs', payload);
         toast.success('Gig created');
+        onSuccess(res.data);
       }
-      onSuccess();
+      // onSuccess(); 
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error saving gig');
     } finally {
@@ -75,8 +82,7 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
     'Station 8',
     'Station 9',
     'Station 10',
-    'Final Station ',
-    
+    'Final Station ',  
   ];
 
   return (
@@ -97,34 +103,77 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Truck Number *
               </label>
-              <input
-                type="Number"
+              <input type="text"
+                value={wkorder}
+                onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
+                className="input-field"
+                disabled/>
+                
+              {/* <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={6}
                 className="input-field"
                 placeholder="e.g: 245001"
                 value={formData.truckNumber}
-                onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
                 required
-              />
+              /> */}
+            </div>
+
+            <div>
+              <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
+                Customer *
+              </label>
+              <input type="text"disabled value={customerWK} className="input-field"
+/>
+
+              {/* <input type="text" disabled value={customerWK} className="input-field"  onChange={() => setFormData({ ...formData, customerName: customerWK?.customerName })} /> */}
+              {/* <input
+                type="text"
+                className="input-field"
+                placeholder="e.g: Seminole Rescue"
+                value={formData.customerName}
+                onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                required
+              /> */}
             </div>            
           </div>
 
-          <div>
-            <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
-              Station *
-            </label>
-            <select
-              className="input-field"
-              value={formData.station}
-              onChange={(e) => setFormData({ ...formData, station: e.target.value })}
-              required
-            >
-              <option value="">Select station...</option>
-              {stations.map((station) => (
-                <option key={station} value={station}>
-                  {station}
-                </option>
-              ))}
-            </select>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
+                Sales Eng *
+              </label>
+              <input
+                type="text"
+                className="input-field"
+                placeholder="e.g: Seminole Rescue"
+                value={formData.salesEng}
+                onChange={(e) => setFormData({ ...formData, salesEng: e.target.value })}
+                required
+              />
+            </div>        
+            <div>           
+              <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
+                Station *
+              </label>
+              <select
+                className="input-field"
+                value={formData.station}
+                onChange={(e) => setFormData({ ...formData, station: e.target.value })}
+                required
+              >
+                <option value="">Select station...</option>
+                {stations.map((station) => (
+                  <option key={station} value={station}>
+                    {station}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div>
@@ -162,7 +211,7 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Inspector
               </label>
-              <span>{user.name}</span>
+              <span>{user.fullName}</span>
               {/* <select
                 className="input-field"
                 value={formData.inspectorId}
@@ -202,6 +251,7 @@ export default function CreateGigModal({ onClose, onSuccess, inspectors, editing
               type="submit"
               className="btn-primary flex-1"
               disabled={loading}
+              onClick={() => navigate(`/gigsorder/${formData.truckNumber}`)}
             >
               {loading ? 'Saving...' : (editingGig ? 'Update Gig' : 'Create Gig')}
             </button>

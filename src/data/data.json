@@ -1,0 +1,310 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "firstname": "John",
+            "lastname": "Doe",
+            "username": "admin",
+            "password": "admin",
+            "role": "admin"
+        },
+        {
+            "id": 2,
+            "firstname": "Jane",
+            "lastname": "Doe",
+            "username": "user",
+            "password": "user",
+            "role": "user"
+        },
+        {
+            "id": 3,
+            "firstname": "Joan",
+            "lastname": "Almonte",
+            "username": "joan",
+            "password": "password123",
+            "role": "admin"
+        },
+        {
+            "id": 4,
+            "firstname": "Jensy",
+            "lastname": "Figueroa",
+            "username": "jensy",
+            "password": "123",
+            "role": "lead-worker"
+        },
+        {
+            "id": 5,
+            "firstname": "Cory",
+            "lastname": "Smith",
+            "username": "cory",
+            "password": "password123",
+            "role": "quality-control"
+        },
+        {
+            "id": 6,
+            "firstname": "Charles",
+            "lastname": "Brooks",
+            "username": "charles",
+            "password": "password123",
+            "role": "supervisor"
+        }
+    ],
+    "stations": [
+        {
+            "id": 1,
+            "name": "Station 1",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 2,
+            "name": "Station 2",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 3,
+            "name": "Station 3",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 4,
+            "name": "Station 4",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 5,
+            "name": "Station 5",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 6,
+            "name": "Station 6",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 7,
+            "name": "Station 7",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 8,
+            "name": "Station 8",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 9,
+            "name": "Station 9",
+            "group": "RoadRescue"
+        },
+        {
+            "id": 10,
+            "name": "Station Final",
+            "group": "RoadRescue"
+        }
+    ],
+    "orders": [
+        {
+            "id": 1,
+            "orderNumber": "ORD-001",
+            "truckName": "Truck A",
+            "customerName": "John Doe",
+            "currentStationId": 1,
+            "status": "Pending"
+        }
+    ],
+    "gigs": [],
+    "comments": [],
+    "roles": [
+        {
+            "id": "1",
+            "name": "admin"
+        },
+        {
+            "id": "2",
+            "name": "employee"
+        },
+        {
+            "id": "3",
+            "name": "quality-control"
+        },
+        {
+            "id": "4",
+            "name": "supervisor"
+        },
+        {
+            "id": "5",
+            "name": "manager"
+        },
+        {
+            "id": "6",
+            "name": "owner"
+        },
+        {
+            "id": "8",
+            "name": "user"
+        }
+    ],
+    "qcAssignments": [
+        {
+            "qcUserId": 1,
+            "stationId": 1
+        }
+    ],
+    "reports": {
+        "lineReport": [
+            {
+                "id": "RoadRescue",
+                "label": "RoadRescue",
+                "value": "24"
+            },
+            {
+                "id": "ModLine",
+                "label": "ModLine",
+                "value": "64"
+            },
+            {
+                "id": "NewYorkLine",
+                "label": "NewYorkLine",
+                "value": "26"
+            },
+            {
+                "id": "VanLine",
+                "label": "RoadRescue",
+                "value": "12"
+            }
+        ],
+        "lineReportDaily": [
+            {
+                "id": "RoadRescue",
+                "data": [
+                    {
+                        "x": "9/8/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/9/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/10/2025",
+                        "y": 2
+                    },
+                    {
+                        "x": "9/11/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/12/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/13/2025",
+                        "y": 2
+                    },
+                    {
+                        "x": "9/14/2025",
+                        "y": 1
+                    }
+                ]
+            },
+            {
+                "id": "ModLine",
+                "data": [
+                    {
+                        "x": "9/8/2025",
+                        "y": 15
+                    },
+                    {
+                        "x": "9/9/2025",
+                        "y": 12
+                    },
+                    {
+                        "x": "9/10/2025",
+                        "y": 13
+                    },
+                    {
+                        "x": "9/11/2025",
+                        "y": 9
+                    },
+                    {
+                        "x": "9/12/2025",
+                        "y": 7
+                    },
+                    {
+                        "x": "9/13/2025",
+                        "y": 4
+                    },
+                    {
+                        "x": "9/14/2025",
+                        "y": 16
+                    }
+                ]
+            },
+            {
+                "id": "NewYorkLine",
+                "data": [
+                    {
+                        "x": "9/8/2025",
+                        "y": 2
+                    },
+                    {
+                        "x": "9/9/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/10/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/11/2025",
+                        "y": 3
+                    },
+                    {
+                        "x": "9/12/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/13/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/14/2025",
+                        "y": 2
+                    }
+                ]
+            },
+            {
+                "id": "VanLine",
+                "data": [
+                    {
+                        "x": "9/8/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/9/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/10/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/11/2025",
+                        "y": 1
+                    },
+                    {
+                        "x": "9/12/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/13/2025",
+                        "y": 0
+                    },
+                    {
+                        "x": "9/14/2025",
+                        "y": 2
+                    }
+                ]
+            }
+        ]
+    }
+}

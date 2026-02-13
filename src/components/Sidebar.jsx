@@ -15,20 +15,20 @@ export default function Sidebar({ user }) {
     switch (userRole) {
       case 'admin':
         return [
-          { path: '/', label: 'Gigs', icon: LayoutDashboard },
+          // { path: '/', label: 'Gigs', icon: LayoutDashboard },
+          { path: '/', label: 'Work Orders', icon: TruckIcon },
           { path: '/operators', label: 'Operators', icon: Users },
-          { path: '/trucks', label: 'Trucks', icon: TruckIcon },
           { path: '/statistics', label: 'Statistics', icon: Notebook },
         ];
       case 'lead':
-        return [{path: '/', label: 'Gigs', icon: LayoutDashboard }, { path: '/operators', label: 'Operators', icon: Users }];
+        return [{path: '/', label: 'Work Orders', icon: LayoutDashboard }, { path: '/operators', label: 'Operators', icon: Users }];
       case 'qc':
-        return [{path: '/', label: 'Gigs', icon: LayoutDashboard }];
+        return [{path: '/', label: 'Work Orders', icon: LayoutDashboard }];
       case 'worker':
-        return [{path: '/', label: 'Gigs', icon: LayoutDashboard }];
+        return [{path: '/', label: 'Work Orders', icon: LayoutDashboard }];
       default:
         return [
-          { path: '/', label: 'Gigs', icon: LayoutDashboard },
+          { path: '/', label: 'Work Orders', icon: LayoutDashboard },
         ];
     }
   };
@@ -53,8 +53,8 @@ export default function Sidebar({ user }) {
         <div className="flex items-center gap-2 mb-4">
           {/* <Shield size={28} className="text-[#FF5722]" /> */}
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-1.5 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list w-4 h-4 text-white" aria-hidden="true">
+            <div className="bg-red-500 p-1.5 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list w-6 h-4 text-white" aria-hidden="true">
               <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
               <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
               <path d="M12 11h4"></path><path d="M12 16h4"></path>

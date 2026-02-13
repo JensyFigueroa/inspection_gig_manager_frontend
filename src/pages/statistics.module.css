@@ -1,0 +1,23 @@
+.ChartContainer {
+    width: 100%;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem; */
+    display: flex;
+    justify-content: space-evenly;
+    align-items:center ;
+}
+
+
+.appContainer {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 14rem; 
+}
+
+.dashboard {
+  
+}

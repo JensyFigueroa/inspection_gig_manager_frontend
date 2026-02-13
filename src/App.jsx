@@ -10,6 +10,9 @@ import Inspectors from './pages/Operators';
 import TruckOrders from './pages/TruckOrders';
 import { Toaster } from './components/ui/sonner';
 import CreateGigModal from './components/CreateGigModal';
+import Statistics from './pages/Statistics';
+import GigsOrder from './pages/GigsOrder';
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -78,10 +81,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth setUser={setUser} />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard user={user} /></ProtectedRoute>} />
-          <Route path="/gig/:gigId" element={<ProtectedRoute><GigDetail/></ProtectedRoute>} />
+          {/* <Route path="/" element={<ProtectedRoute><Dashboard user={user} /></ProtectedRoute>} /> */}
+          <Route path="/" element={<ProtectedRoute><TruckOrders user={user} /></ProtectedRoute>} />
+          <Route path="/gigsorder/:wkorder" element={<ProtectedRoute><GigsOrder user={user} /></ProtectedRoute>} />
+          <Route path="/gig/:gigId" element={<ProtectedRoute><GigDetail user={user}/></ProtectedRoute>} />
           <Route path="/operators" element={<ProtectedRoute><Inspectors user={user} /></ProtectedRoute>} />
-          <Route path="/trucks" element={<ProtectedRoute><TruckOrders user={user} /></ProtectedRoute>} />
+          <Route path="/statistics" element={<ProtectedRoute><Statistics user={user} /></ProtectedRoute>} />
+
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />

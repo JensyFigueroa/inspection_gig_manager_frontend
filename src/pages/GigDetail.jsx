@@ -7,7 +7,7 @@ import PhotoUploader from '../components/PhotoUploader';
 import WorkerActionModal from '../components/WorkerActionModal';
 import { ArrowLeft, Image as ImageIcon, X, User, Clock, AlertCircle, Play, CheckCircle, Ban } from 'lucide-react';
 
-export default function GigDetail() {
+export default function GigDetail({user}) {
   const { gigId } = useParams();
   const navigate = useNavigate();
   const [gig, setGig] = useState(null);
@@ -270,7 +270,7 @@ export default function GigDetail() {
                       Inspector 
                     </label>
                     <p className="font-mono text-sm text-slate-900">
-                      {inspectorRes.name}
+                      {inspectorRes.fullName}
                     </p>
                   </div>
                 </div>

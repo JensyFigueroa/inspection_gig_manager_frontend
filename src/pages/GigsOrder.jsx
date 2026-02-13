@@ -1,25 +1,26 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { authAxios } from '../App';
-import { toast } from 'sonner';
 import Sidebar from '../components/Sidebar';
-import CreateGigModal from '../components/CreateGigModal';
-import WorkerActionModal from '../components/WorkerActionModal';
+import styles from '../pages/statistics.module.css';
+import { toast } from 'sonner';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading } from 'lucide-react';
+import WorkerActionModal from '../components/WorkerActionModal';
+import CreateGigModal from '../components/CreateGigModal';
 
-export default function Dashboard({ user }) {
+export default function GigsOrder ({user}) {
+  const navigate = useNavigate();
+  const { wkorder } = useParams();
   const [gigs, setGigs] = useState([]);
   const [users, setUsers] = useState([]);
   const [operators, setOperators] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [filterStatus, setFilterStatus] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingGig, setEditingGig] = useState(null);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterStation, setFilterStation] = useState('');
-  const [filterTruck, setFilterTruck] = useState('');
+  const [loading, setLoading] = useState(true);
   const [photoPreview, setPhotoPreview] = useState(null);
-  
-  // Worker Action Modal
+
+   // Worker Action Modal
   const [workerActionModal, setWorkerActionModal] = useState({
     isOpen: false,
     action: null,
@@ -27,22 +28,22 @@ export default function Dashboard({ user }) {
     gigInfo: null
   });
 
-  const navigate = useNavigate();
-
   useEffect(() => {
-    loadData();
+    loadData(wkorder);
   }, []);
 
-  const loadData = async () => {
+  const loadData = async (wkorder) => {
     try {
       const [gigsRes, usersRes, operatorsRes] = await Promise.all([
-        authAxios.get('/gigs'),
+         authAxios.get('/gigs/'),
         authAxios.get('/users'),
         authAxios.get('/operators'),
       ]);
-      setGigs(gigsRes.data);
+
+      setGigs(gigsRes.data.filter(gigs => gigs.truckNumber === wkorder && gigs));
       setUsers(usersRes.data);
       setOperators(operatorsRes.data);
+      
     } catch (error) {
       toast.error('Error loading data');
     } finally {
@@ -50,28 +51,29 @@ export default function Dashboard({ user }) {
     }
   };
 
+  const customerWK = gigs.find(
+  gig => gig.truckNumber === wkorder
+)?.customerName || '';
 
-  const handleOperatorChange = async (gigId, employeeNumber) => {
-    
-  try {
-    await authAxios.put(`/gigs/${gigId}`, {
-      employeeNumber
-    });
+   const getStatusBadgeClass = (status) => {
+    const classes = {
+      'pending': 'status-pending',
+      'in-progress': 'status-in-progress',
+      'completed': 'status-completed',
+      'blocked': 'bg-red-100 text-red-800 border-red-300'
+    };
+    return `status-badge ${classes[status] || ''}`;
+  };
 
-    // Update local state (without reloading the entire page)
-    setGigs(prev =>
-      prev.map(gig =>
-        gig._id === gigId
-          ? { ...gig, employeeNumber }
-          : gig
-      )
-    );
-
-    toast.success('Operator assigned');
-  } catch (error) {
-    toast.error('Error assigning operator');
-  }
-};
+    const getStatusText = (status) => {
+    const texts = {
+      'pending': 'Pending',
+      'in-progress': 'In Progress',
+      'completed': 'Completed',
+      'blocked': 'Blocked'
+    };
+    return texts[status] || status;
+  };
 
   const handleDelete = async (gigId, e) => {
     e.stopPropagation();
@@ -86,7 +88,7 @@ export default function Dashboard({ user }) {
     }
   };
 
-  const handleEdit = (gig, e) => {
+    const handleEdit = (gig, e) => {
     e.stopPropagation();
     setEditingGig(gig);
     setShowModal(true);
@@ -120,53 +122,24 @@ export default function Dashboard({ user }) {
         toast.success('Gig bloqueado');
       }
 
-      loadData();
+      loadData(wkorder);
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error processing action');
     }
   };
 
-  const getUserName = (id) => {
-    const user = users.find(i => i._id === id);
-    return user ? user.name : 'Unknown';
-  };
-
-  const filteredGigs = gigs.filter(gig => {
-    const statusMatch = filterStatus === 'all' || gig.status === filterStatus;
-    const stationMatch = !filterStation || gig.station.toLowerCase().includes(filterStation.toLowerCase());
-    const truckMatch = !filterTruck || (gig.truckNumber && gig.truckNumber.toLowerCase().includes(filterTruck.toLowerCase()));
-    return statusMatch && stationMatch && truckMatch;
-  });
-
   const handlePhotoClick = (photoUrl, e) => {
     e.stopPropagation();
-
     setPhotoPreview(photoUrl);
   };
-  
- 
 
-  const getStatusBadgeClass = (status) => {
-    const classes = {
-      'pending': 'status-pending',
-      'in-progress': 'status-in-progress',
-      'completed': 'status-completed',
-      'blocked': 'bg-red-100 text-red-800 border-red-300'
-    };
-    return `status-badge ${classes[status] || ''}`;
-  };
-
-  const getStatusText = (status) => {
-    const texts = {
-      'pending': 'Pending',
-      'in-progress': 'In Progress',
-      'completed': 'Completed',
-      'blocked': 'Blocked'
-    };
-    return texts[status] || status;
-  };
+   const filteredGigs = gigs.filter(gig => {
+    const statusMatch = filterStatus === 'all' || gig.status === filterStatus;
+    return statusMatch 
+  });
 
   if (loading) {
+    
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="w-12 h-12 border-4 border-[#FF5722] border-t-transparent rounded-full animate-spin"></div>
@@ -175,24 +148,22 @@ export default function Dashboard({ user }) {
   }
 
   return (
-    <div className="flex">
-      <Sidebar user={user} />
-    
-      <div className="flex-1 ml-64 p-8 lg:p-12 bg-gray-50 min-h-screen">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="font-heading font-black text-4xl uppercase tracking-tight text-slate-900 mb-2">
-              Gigs
-            </h1>
-            <p className="font-body text-slate-600">
-              {user.role === 'admin' && 'Manage all production gigs'}
-              {user.role === 'qc' && 'Manage all production gigs'}
-              {user.role === 'lead' && `Station: ${user.station}`}
-              {user.role === 'worker' && `Station: ${user.station}`}
-            </p>
-          </div>
-          
-          {/* Only QC can be create gigs */}
+    <div className={styles.appContainer}>
+      <div className={styles.sidebar}>
+        <Sidebar user={user}/>
+      </div>
+
+      <div className="flex-1 ml-54 p-8 lg:p-12 bg-gray-50 min-h-screen">
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="font-heading font-black text-4xl uppercase tracking-tight text-slate-900 mb-2">
+                Work Order # {wkorder}
+              </h1>
+              <h4>Customer: {customerWK}</h4>
+              <h4>Sales. Eng: </h4>              
+              
+            </div>
+            {/* Only QC can be create gigs */}
           {user.role === 'qc' && (
             <button
               onClick={() => {
@@ -205,9 +176,11 @@ export default function Dashboard({ user }) {
               New Gig
             </button>
           )}
-        </div>
+          </div>
 
-        <div className="mb-6 flex flex-wrap gap-4 items-end">
+          <div className={styles.dashboard}>
+
+          <div className="mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex gap-2">
             {['all', 'pending', 'in-progress', 'completed', 'blocked'].map(status => (
               <button
@@ -215,7 +188,7 @@ export default function Dashboard({ user }) {
                 onClick={() => setFilterStatus(status)}
                 className={`px-4 py-2 font-mono text-xs uppercase tracking-wider rounded-sm transition-all ${
                   filterStatus === status
-                    ? 'bg-[#FF5722] text-white'
+                    ? 'bg-[#ff2222] text-white'
                     : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
                 }`}
               >
@@ -227,51 +200,24 @@ export default function Dashboard({ user }) {
             ))}
           </div>
           
-          {user.role === 'qc' && (
-            <div className="flex-1 max-w-xs">
-              <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
-                Filter by Station
-              </label>
-              <input
-                type="text"
-                placeholder="Find station..."
-                className="input-field"
-                value={filterStation}
-                onChange={(e) => setFilterStation(e.target.value)}
-              />
-            </div>
-          )}
-
-          <div className="flex-1 max-w-xs">
-            <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
-              Filter by Truck
-            </label>
-            <input
-              type="text"
-              placeholder="Find truck..."
-              className="input-field"
-              value={filterTruck}
-              onChange={(e) => setFilterTruck(e.target.value)}
-            />
-          </div>
         </div>
 
-        <div className="table-container">
+          <div className="table-container">
           <table className="w-full">
             <thead>
               <tr>
-                <th className="table-header text-left">Truck #</th>                
+                <th className="table-header text-left">Work Order #</th>                
                 <th className="table-header text-left">Station</th>
                 <th className="table-header text-left">Description</th>
                 <th className="table-header text-left">Photo</th>
                 <th className="table-header text-left">Status</th>
                 <th className="table-header text-left">Operator</th>
                 <th className="table-header text-left">Inspector</th>
-                <th className="table-header text-center">Actions</th>
+                <th className="table-header text-center">Actions</th>                
               </tr>
             </thead>
             <tbody>
-              {filteredGigs.map((gig, index) => (
+              {filteredGigs.map((gig, index) =>  (
                 <tr
                   key={gig._id}
                   className="table-row fade-in-up"
@@ -307,27 +253,14 @@ export default function Dashboard({ user }) {
                     </span>
                   </td>
                   <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
-                    {user.role === 'lead' ? (
-              
-                      <select className="input-field" value={gig.employeeNumber || ''} onChange={(e) => handleOperatorChange(gig._id, e.target.value)}>
-                          {operators.map(operator => (
-                            <option key={operator.employeeNumber} value={operator.employeeNumber}>
-                              {operator.fullName}
-                            </option>
-                            ))}
-                          </select>
-
-            
-                ) :  <span className="font-body text-sm text-slate-600"   >
+                    <span className="font-body text-sm text-slate-600"   >
                       {operators.map(operator => operator.employeeNumber === gig.employeeNumber && operator.fullName)}
-                    </span>}
-                  
-                    
-                          
+                    </span>                  
                   </td>
                   <td className="p-4 font-body text-sm text-slate-600" onClick={() => navigate(`/gig/${gig._id}`)}>
-                    {getUserName(gig.inspectorId)}
+                    {users.map(user => user._id === gig.inspectorId && user.fullName)}
                   </td>
+
                   <td className="p-4">
                     <div className="flex justify-center gap-2 flex-wrap">
                       {/* Buttons for Worker and Lead */}
@@ -397,43 +330,43 @@ export default function Dashboard({ user }) {
                       )}
                     </div>
                   </td>
+                  
                 </tr>
               ))}
             </tbody>
           </table>
-          {filteredGigs.length === 0 && (
-            <div className="p-12 text-center">
-              <p className="font-body text-slate-500">There are no gigs available</p>
-            </div>
-          )}
+         
         </div>
       </div>
 
+      </div>
+
       {/* Create/Edit Gig Modal (QC Only) */}
-      {user.role === 'qc' && showModal && (
-        <CreateGigModal user={user}
-          onClose={() => {
-            setShowModal(false);
-            setEditingGig(null);
-          }}
-          onSuccess={() => {
-            loadData();
-            setShowModal(false);
-            setEditingGig(null);
-          }}
-          editingGig={editingGig}
-        />
-      )}
-
-      {/* Modal de Acciones de Worker */}
-      <WorkerActionModal
-        isOpen={workerActionModal.isOpen}
-        onClose={() => setWorkerActionModal({ ...workerActionModal, isOpen: false })}
-        onConfirm={handleWorkerAction}
-        action={workerActionModal.action}
-        gigInfo={workerActionModal.gigInfo}
-      />
-
+            {user.role === 'qc' && showModal && (
+              <CreateGigModal user={user} wkorder={wkorder} customerWK={customerWK}
+                onClose={() => {
+                  setShowModal(false);
+                  setEditingGig(null);
+                }}
+                onSuccess={() => {
+                  loadData(wkorder);
+                  setShowModal(false);
+                  setEditingGig(null);
+                }}
+                editingGig={editingGig}
+              />
+            )}
+      
+            {/* Modal de Acciones de Worker */}
+            <WorkerActionModal
+              isOpen={workerActionModal.isOpen}
+              onClose={() => setWorkerActionModal({ ...workerActionModal, isOpen: false })}
+              onConfirm={handleWorkerAction}
+              action={workerActionModal.action}
+              gigInfo={workerActionModal.gigInfo}
+            />
+      
+      
       {/* Preview de Photo */}
       {photoPreview && (
         <div 
@@ -457,6 +390,7 @@ export default function Dashboard({ user }) {
           </div>
         </div>
       )}
+      
     </div>
-  );
+  )
 }

@@ -253,9 +253,12 @@ const salesEng = gigs.find(
                 >
                   <td className="p-4 font-mono text-sm font-bold text-slate-900" onClick={() => navigate(`/gig/${gig._id}`)}>{gig.truckNumber}</td>                  
                   <td className="p-4 font-mono text-sm font-medium text-slate-900" onClick={() => navigate(`/gig/${gig._id}`)}>{gig.station}</td>
-                  <td className="p-4 font-body text-sm text-slate-600" onClick={() => navigate(`/gig/${gig._id}`)}>
-                    {gig.description.length > 40 ? `${gig.description.substring(0, 40)}...` : gig.description}
+                  <td className="p-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs" onClick={() => navigate(`/gig/${gig._id}`)}>
+                    {gig.description.length > 200 ? `${gig.description.substring(0, 200)}...` : gig.description}
                   </td>
+                  {/* <td className="p-4 font-body text-sm text-slate-600" onClick={() => navigate(`/gig/${gig._id}`)}>
+                    {gig.description.length > 100 ? `${gig.description.substring(0, 100)}...` : gig.description}
+                  </td> */}
                   <td className="p-4" onClick={(e) => e.stopPropagation()}>
                     {gig.photos && gig.photos.length > 0 ? (
                       <button

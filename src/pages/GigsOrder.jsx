@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import styles from '../pages/statistics.module.css';
 import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading, Star, XCircleIcon, CheckCircleIcon, CheckCircle2Icon } from 'lucide-react';
 import WorkerActionModal from '../components/WorkerActionModal';
 import CreateGigModal from '../components/CreateGigModal';
 
@@ -174,6 +174,49 @@ const salesEng = gigs.find(
     );
   }
 
+
+  const renderButtons = () => {
+  if (user.role !== "qc") return null;
+
+  const gig =  gigs.map(gig => gig.status )
+
+  switch (gig.status) {
+    case "pending":
+    case "progress":
+      return (
+        <>
+          <button
+            onClick={(e) => handleEdit(gig, e)}
+            className="p-2 hover:bg-slate-100 rounded transition-colors"
+            title="Edit"
+          >
+            <Pencil size={16} className="text-slate-600" />
+          </button>
+          <button
+            onClick={(e) => handleDelete(gig._id, e)}
+            className="p-2 hover:bg-red-50 rounded transition-colors"
+            title="Delete"
+          >
+            <Trash2 size={16} className="text-red-600" />
+          </button>
+        </>
+      );
+    case "complete":
+      return (
+        <>
+          <button  >
+            <CheckCircle2Icon className="..." />
+          </button>
+          <button  >
+            <XCircleIcon className="..." />
+          </button>
+        </>
+      );
+    default:
+      return null;
+  }
+};
+
   return (
     <div className={styles.appContainer}>
       <div className={styles.sidebar}>
@@ -184,10 +227,13 @@ const salesEng = gigs.find(
           <div className="mb-8 flex justify-between items-center">
             <div>
               <h1 className="font-heading font-black text-4xl uppercase tracking-tight text-slate-900 mb-2">
-                Work Order # {wkorder}
+                QUALITY DEPARTMENT INSPECTIN SHEET
               </h1>
+              <h4 className="font-heading font-black text-2xl uppercase tracking-tight text-slate-800 mb-2">
+                Work Order # {wkorder}
+              </h4>
               <h4>Customer: {customerWK}</h4>
-              <h4>Sales. Eng: </h4>              
+              <h4>Sales. Eng: {salesEng} </h4>              
               
             </div>
             {/* Only QC can be create gigs */}
@@ -238,6 +284,8 @@ const salesEng = gigs.find(
                 <th className="table-header text-left">Description</th>
                 <th className="table-header text-left">Photo</th>
                 <th className="table-header text-left">Status</th>
+                <th className="table-header text-left">Pass</th>
+                <th className="table-header text-left">Fail</th>
                 <th className="table-header text-left">Operator</th>
                 <th className="table-header text-left">Inspector</th>
                 <th className="table-header text-center">Actions</th>                
@@ -282,6 +330,24 @@ const salesEng = gigs.find(
                       {getStatusText(gig.status)}
                     </span>
                   </td>
+                  <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
+                    <span className={getStatusBadgeClass(gig.status)}>
+                      {/* {getStatusText(gig.status)} */}
+                      
+                    </span>
+                  </td>
+                  <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
+                    <span className={getStatusBadgeClass(gig.status)}>
+                      {/* {getStatusText(gig.status)} */}
+                      {gigs.status === 'completed' 
+                      ? 
+                        <Star className="w-6 h-6 text-red-500 fill-yellow-500" /> 
+                      :
+                        <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
+                      }
+                      
+                    </span>
+                  </td>
 
                   {/* <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
                     <span className="font-body text-sm text-slate-600"   >
@@ -293,7 +359,8 @@ const salesEng = gigs.find(
                     {user.role === 'lead' ? (
               
                       <select className="input-field" value={gig.employeeNumber || ''} onChange={(e) => handleOperatorChange(gig._id, e.target.value)}>
-                          {operators.map(operator => (
+                        <option>Unassigned</option>
+                          {operators.map(operator => operator.station === gig.station &&(
                             <option key={operator.employeeNumber} value={operator.employeeNumber}>
                               {operator.fullName}
                             </option>
@@ -302,7 +369,7 @@ const salesEng = gigs.find(
 
             
                 ) :  <span className="font-body text-sm text-slate-600"   >
-                      {operators.map(operator => operator.employeeNumber === gig.employeeNumber && operator.fullName)}
+                      {operators.map(operator => operator.employeeNumber === gig.employeeNumber  && operator.fullName)}
                     </span>}
                   
                     
@@ -362,21 +429,40 @@ const salesEng = gigs.find(
                       )}
 
                       {/* Buttons for QC only */}
-                      {user.role === 'qc' && (
+                      { user.role === 'qc' && (gig.status === 'pending' || gig.status === 'in-progress') && (
                         <>
                           <button
                             onClick={(e) => handleEdit(gig, e)}
                             className="p-2 hover:bg-slate-100 rounded transition-colors"
                             title="Edit"
                           >
-                            <Pencil size={16} className="text-slate-600" />
+                            <Pencil size={16} className="w-6 h-6 text-slate-600" />
                           </button>
                           <button
                             onClick={(e) => handleDelete(gig._id, e)}
                             className="p-2 hover:bg-red-50 rounded transition-colors"
                             title="Delete"
                           >
-                            <Trash2 size={16} className="text-red-600" />
+                            <Trash2 size={16} className="w-6 h-6 text-red-600" />
+                          </button>
+                        </>
+                      )}
+
+                      { user.role === 'qc' && gig.status === 'completed' &&(
+                        <>
+                          <button
+                            onClick={(e) => handleAproved(gig._id, e)}
+                            className="p-2 hover:bg-green-50 rounded transition-colors"
+                            title="Approved"
+                          >
+                            <CheckCircle2Icon className="w-6 h-6 text-green-500" />
+                          </button>
+                          <button
+                            onClick={(e) => handleRejected(gig._id, e)}
+                            className="p-2 hover:bg-red-50 rounded transition-colors"
+                            title="Rejected"
+                          >
+                            <XCircleIcon className="w-6 h-6 text-red-500" />
                           </button>
                         </>
                       )}

@@ -10,7 +10,7 @@ import { ArrowLeft, Image as ImageIcon, X, User, Clock, AlertCircle, Play, Check
 export default function GigDetail({user}) {
   const { gigId } = useParams();
   const navigate = useNavigate();
-  const [gig, setGig] = useState(null);
+  const [gigs, setGigs] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [inspectorRes, setInspectorRes] = useState([]);
@@ -37,7 +37,7 @@ export default function GigDetail({user}) {
         authAxios.get('/operators'),
       ]);
       
-      setGig(gigRes.data);
+      setGigs(gigRes.data);
       setComments(commentsRes.data);
 
       if (gigRes.data.inspectorId) {
@@ -76,7 +76,7 @@ export default function GigDetail({user}) {
   const handleAddPhoto = async (newPhotos) => {
     try {
       await authAxios.put(`/gigs/${gigId}`, { photos: newPhotos });
-      setGig({ ...gig, photos: newPhotos });
+      setGigs({ ...gigs, photos: newPhotos });
       setShowPhotoUploader(false);
       toast.success('Photos updated');
       loadGigData();
@@ -101,8 +101,8 @@ export default function GigDetail({user}) {
       isOpen: true,
       action,
       gigInfo: {
-        truckNumber: gig.truckNumber,
-        station: gig.station
+        truckNumber: gigs.truckNumber,
+        station: gigs.station
       }
     });
   };
@@ -165,7 +165,7 @@ export default function GigDetail({user}) {
     );
   }
 
-  if (!gig) return null;
+  if (!gigs) return null;
 
   return (
     <div className="flex">
@@ -173,7 +173,7 @@ export default function GigDetail({user}) {
       
       <div className="flex-1 ml-64 p-8 lg:p-12 bg-gray-50 min-h-screen">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(`/gigsorder/${gigs.truckNumber}`)}
           className="flex items-center gap-2 font-body text-slate-600 hover:text-slate-900 mb-6 transition-colors"
         >
           <ArrowLeft size={20} />
@@ -187,20 +187,20 @@ export default function GigDetail({user}) {
               <div className="mb-6 flex justify-between items-start">
                 <div>
                   <h1 className="font-heading font-bold text-3xl text-slate-900 mb-2">
-                    Truck # {gig.truckNumber}
+                    Truck # {gigs.truckNumber}
                   </h1>
                   <p className="font-mono text-sm text-slate-600 mb-3">
-                    Station: <span className="font-bold">{gig.station}</span>
+                    Station: <span className="font-bold">{gigs.station}</span>
                   </p>
-                  <span className={getStatusBadgeClass(gig.status)}>
-                    {getStatusText(gig.status)}
+                  <span className={getStatusBadgeClass(gigs.status)}>
+                    {getStatusText(gigs.status)}
                   </span>
                 </div>
 
                 {/* Action Buttons for Worker/Lead */}
                 {(user.role === 'worker' || user.role === 'lead') && (
                   <div className="flex gap-2">
-                    {/* {gig.status === 'pending' && (
+                    {/* {gigs.status === 'pending' && (
                       <button
                         onClick={() => openWorkerActionModal('start')}
                         className="btn-primary flex items-center gap-2"
@@ -209,7 +209,7 @@ export default function GigDetail({user}) {
                         Start
                       </button>
                     )} */}
-                    {gig.status === 'in-progress' && (
+                    {gigs.status === 'in-progress' && (
                       <>
                         <button
                           onClick={() => openWorkerActionModal('complete')}
@@ -227,7 +227,7 @@ export default function GigDetail({user}) {
                         </button>
                       </>
                     )}
-                    {gig.status === 'blocked' && (
+                    {gigs.status === 'blocked' && (
                       <button
                         onClick={() => openWorkerActionModal('start')}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-sm py-2 px-4 rounded-sm transition-colors flex items-center gap-2"
@@ -245,7 +245,7 @@ export default function GigDetail({user}) {
                   <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-1">
                     Description
                   </label>
-                  <p className="font-body text-slate-900">{gig.description}</p>
+                  <p className="font-body text-slate-900">{gigs.description}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
@@ -261,7 +261,7 @@ export default function GigDetail({user}) {
                       Inspection Date 
                     </label>
                     <p className="font-mono text-sm text-slate-900">
-                      {gig.createdAt ? new Date(gig.createdAt).toLocaleDateString('en-US'): '-'}
+                      {gigs.createdAt ? new Date(gigs.createdAt).toLocaleDateString('en-US'): '-'}
                     </p>
                   </div>
 
@@ -278,11 +278,11 @@ export default function GigDetail({user}) {
             </div>
 
             {/* Gig History */}
-            {(gig.startedBy || gig.completedBy) && (
+            {(gigs.startedBy || gigs.completedBy) && (
               <div className="card">
                 <h2 className="font-heading font-bold text-xl text-slate-900 mb-4">Gig History</h2>
                 
-                {gig.startedBy && (
+                {gigs.startedBy && (
                   <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <User size={18} className="text-orange-600" />
@@ -291,17 +291,17 @@ export default function GigDetail({user}) {
                       </span>
                     </div>
                     <p className="font-body text-sm text-slate-900">
-                      <span className="font-bold">{gig.startedBy.workerName}</span>
-                      <span className="text-slate-600"> (#{gig.startedBy.workerNumber})</span>
+                      <span className="font-bold">{gigs.startedBy.workerName}</span>
+                      <span className="text-slate-600"> (#{gigs.startedBy.workerNumber})</span>
                     </p>
                     <p className="font-mono text-xs text-slate-600 mt-1 flex items-center gap-1">
                       <Clock size={14} />
-                      {new Date(gig.startedBy.startedAt).toLocaleString('es-ES')}
+                      {new Date(gigs.startedBy.startedAt).toLocaleString('es-ES')}
                     </p>
                   </div>
                 )}
 
-                {gig.completedBy && (
+                {gigs.completedBy && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-sm">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle size={18} className="text-green-600" />
@@ -310,12 +310,12 @@ export default function GigDetail({user}) {
                       </span>
                     </div>
                     <p className="font-body text-sm text-slate-900">
-                      <span className="font-bold">{gig.completedBy.workerName}</span>
-                      <span className="text-slate-600"> (#{gig.completedBy.workerNumber})</span>
+                      <span className="font-bold">{gigs.completedBy.workerName}</span>
+                      <span className="text-slate-600"> (#{gigs.completedBy.workerNumber})</span>
                     </p>
                     <p className="font-mono text-xs text-slate-600 mt-1 flex items-center gap-1">
                       <Clock size={14} />
-                      {new Date(gig.completedBy.completedAt).toLocaleString('es-ES')}
+                      {new Date(gigs.completedBy.completedAt).toLocaleString('es-ES')}
                     </p>
                   </div>
                 )}
@@ -323,7 +323,7 @@ export default function GigDetail({user}) {
             )}
 
             {/* information blockade */}
-            {gig.status === 'blocked' && gig.blockedInfo && (
+            {gigs.status === 'blocked' && gigs.blockedInfo && (
               <div className="card bg-red-50 border-red-200">
                 <div className="flex items-center gap-2 mb-4">
                   <AlertCircle size={24} className="text-red-600" />
@@ -336,17 +336,17 @@ export default function GigDetail({user}) {
                       Reason
                     </label>
                     <p className="font-body font-bold text-red-900">
-                      {getBlockedReasonText(gig.blockedInfo.reason)}
+                      {getBlockedReasonText(gigs.blockedInfo.reason)}
                     </p>
                   </div>
 
-                  {gig.blockedInfo.note && (
+                  {gigs.blockedInfo.note && (
                     <div>
                       <label className="font-mono text-xs uppercase tracking-wider text-red-700 block mb-1">
                         Note
                       </label>
                       <p className="font-body text-red-900">
-                        {gig.blockedInfo.note}
+                        {gigs.blockedInfo.note}
                       </p>
                     </div>
                   )}
@@ -356,12 +356,12 @@ export default function GigDetail({user}) {
                       Blocked by
                     </label>
                     <p className="font-body text-red-900">
-                      <span className="font-bold">{gig.blockedInfo.blockedBy.workerName}</span>
-                      <span className="text-red-700"> (#{gig.blockedInfo.blockedBy.workerNumber})</span>
+                      <span className="font-bold">{gigs.blockedInfo.blockedBy.workerName}</span>
+                      <span className="text-red-700"> (#{gigs.blockedInfo.blockedBy.workerNumber})</span>
                     </p>
                     <p className="font-mono text-xs text-red-700 mt-1 flex items-center gap-1">
                       <Clock size={14} />
-                      {new Date(gig.blockedInfo.blockedAt).toLocaleString('es-ES')}
+                      {new Date(gigs.blockedInfo.blockedAt).toLocaleString('es-ES')}
                     </p>
                   </div>
                 </div>
@@ -383,15 +383,15 @@ export default function GigDetail({user}) {
               {showPhotoUploader && (
                 <div className="mb-4 p-4 bg-slate-50 rounded-sm border border-slate-200">
                   <PhotoUploader 
-                    photos={gig.photos || []}
+                    photos={gigs.photos || []}
                     onPhotosChange={handleAddPhoto}
                   />
                 </div>
               )}
 
-              {gig.photos && gig.photos.length > 0 ? (
+              {gigs.photos && gigs.photos.length > 0 ? (
                 <div className="photo-grid">
-                  {gig.photos.map((photo, index) => (
+                  {gigs.photos.map((photo, index) => (
                     <div key={index} className="photo-item group">
                       <img src={photo} alt={`Foto ${index + 1}`} />
                       <button

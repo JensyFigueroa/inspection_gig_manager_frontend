@@ -4,7 +4,6 @@ export default function SingleOrder  ({gigs})  {
 
     const navigate = useNavigate();
     const flatGigs = gigs.flat();
-    console.log(flatGigs)
 
 // Group gigs by truckNumber and count the states.
 const gigsByTruck = flatGigs.reduce((acc, gig) => {
@@ -47,17 +46,17 @@ const uniqueGigs = Object.values(gigsByTruck);
                 <i className="bi bi-building me-1"><span> Customer Name: {gig.customerName}</span></i>
               </h5>
 
-              <span className="badge text-bg-dark">
+              {/* <span className="badge text-bg-dark">
                 <i className="bi bi-geo-alt me-1"></i>
                 {gig.station}
-              </span>
+              </span> */}
 
               <span className="badge text-bg-success">Active</span>
             </div>
 
             <div>
             <i className="bi bi-calendar-event me-1"></i>
-            <span>{gig.createdAt ? new Date(gig.createdAt).toLocaleDateString('en-US'): '-'}</span>
+            <span>Date of Inspection: {gig.createdAt ? new Date(gig.createdAt).toLocaleDateString('en-US'): '-'}</span>
             <span className="ms-2 text-danger">
             {/* <i className="bi bi-exclamation-circle me-1"></i>
             <span className="fw-bold me-2">Overdue</span> */}

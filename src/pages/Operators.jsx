@@ -5,13 +5,15 @@ import Sidebar from '../components/Sidebar';
 import { Plus, Trash2, Mail, Calendar } from 'lucide-react';
 
 export default function Operators({ user }) {
+  console.log(user)
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     employeeNumber: '', 
     fullName: '', 
-    position: '' 
+    position: '', 
+    station: user.station
   });
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function Operators({ user }) {
     try {
       const response = await authAxios.post('/operators', formData);
       setOperators([...operators, response.data]);
-      setFormData({ employeeNumber: '', fullName: '', position: ''  });
+      setFormData({ employeeNumber: '', fullName: '', position: '', station: user.station });
       setShowForm(false);
       toast.success('Operator created');
     } catch (error) {
@@ -92,7 +94,7 @@ export default function Operators({ user }) {
         {/* Create Inspector Form */}
         {showForm && user.role === 'lead' && (
           <div className="card mb-6 max-w-md animate-fadeIn">
-            <h2 className="font-heading font-bold text-xl text-slate-900 mb-4">New Inspector</h2>
+            <h2 className="font-heading font-bold text-xl text-slate-900 mb-4">New Operator</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
@@ -155,7 +157,7 @@ export default function Operators({ user }) {
         {/* List of operators */}
         {operators.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {operators.map((operator, index) => (
+            {operators.map((operator, index) => operator.station === user.station && (
               <div
                 key={operator._id}
                 className="card fade-in-up hover:shadow-lg transition-shadow"
@@ -240,7 +242,7 @@ export default function Operators({ user }) {
         )}
 
         {/* statistic */}
-        {operators.length > 0 && (
+        {/* {operators.length > 0 && (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <h3 className="font-mono text-xs uppercase tracking-wider mb-2 opacity-90">
@@ -271,7 +273,7 @@ export default function Operators({ user }) {
               </p>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -1,0 +1,4 @@
+/* make the selected week a bit brighter */
+.table-primary > td {
+  background-color: #cfe2ff !important; /* Bootstrap's primary shade */
+}

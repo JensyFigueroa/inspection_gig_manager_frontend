@@ -17,6 +17,7 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
     customerName: customerWK !== '' ? customerWK : '',
     salesEng: salesEng !== '' ? salesEng : '',
     status: 'pending',
+    inspectionStatus:'',
     employeeNumber: 100000,
     photos: []
   });
@@ -32,6 +33,7 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
         salesEng: editingGig.salesEng || '',
         status: editingGig.status,
         inspectorId: editingGig.inspectorId || '',
+        inspectionStatus:editingGig.inspectionStatus || '',
         employeeNumber: editingGig.employeeNumber || 'Unassigned',
         photos: editingGig.photos || []
       });

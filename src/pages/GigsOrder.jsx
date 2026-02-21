@@ -120,6 +120,24 @@ const salesEng = gigs.find(
     setEditingGig(gig);
     setShowModal(true);
   };
+    const handleAproved = async(gigId, e) => {
+    e.stopPropagation();
+   try {
+      
+        await authAxios.post(`/gigs/${gigId}/approved`, 'approved');
+        toast.success('Gig Approved');
+   
+      loadData(wkorder);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error processing action');
+    }
+  }
+  
+    const handleRejected = (gig, e) => {
+    e.stopPropagation();
+    // setEditingGig(gig);
+    // setShowModal(true);
+  };
 
   const openWorkerActionModal = (action, gig, e) => {
     e.stopPropagation();
@@ -173,49 +191,6 @@ const salesEng = gigs.find(
       </div>
     );
   }
-
-
-  const renderButtons = () => {
-  if (user.role !== "qc") return null;
-
-  const gig =  gigs.map(gig => gig.status )
-
-  switch (gig.status) {
-    case "pending":
-    case "progress":
-      return (
-        <>
-          <button
-            onClick={(e) => handleEdit(gig, e)}
-            className="p-2 hover:bg-slate-100 rounded transition-colors"
-            title="Edit"
-          >
-            <Pencil size={16} className="text-slate-600" />
-          </button>
-          <button
-            onClick={(e) => handleDelete(gig._id, e)}
-            className="p-2 hover:bg-red-50 rounded transition-colors"
-            title="Delete"
-          >
-            <Trash2 size={16} className="text-red-600" />
-          </button>
-        </>
-      );
-    case "complete":
-      return (
-        <>
-          <button  >
-            <CheckCircle2Icon className="..." />
-          </button>
-          <button  >
-            <XCircleIcon className="..." />
-          </button>
-        </>
-      );
-    default:
-      return null;
-  }
-};
 
   return (
     <div className={styles.appContainer}>

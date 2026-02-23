@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 import { Plus, Trash2, Mail, Calendar } from 'lucide-react';
 
 export default function Operators({ user }) {
-  console.log(user)
   const [operators, setOperators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -13,7 +12,7 @@ export default function Operators({ user }) {
     employeeNumber: '', 
     fullName: '', 
     position: '', 
-    station: user.station
+    station: user.station || '',
   });
 
   useEffect(() => {
@@ -24,6 +23,7 @@ export default function Operators({ user }) {
     try {
       const response = await authAxios.get('/operators');
       setOperators(response.data);
+
     } catch (error) {
       toast.error('Error loading operators');
     } finally {
@@ -33,6 +33,7 @@ export default function Operators({ user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData)
     try {
       const response = await authAxios.post('/operators', formData);
       setOperators([...operators, response.data]);
@@ -72,7 +73,7 @@ export default function Operators({ user }) {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="font-heading font-black text-4xl uppercase tracking-tight text-slate-900 mb-2">
-              Operadores
+              Operators
             </h1>
             <p className="font-body text-slate-600">
               {user.role === 'qc' ? 'Manages the Operatos team' : 'See the list of Operatos'}
@@ -155,9 +156,73 @@ export default function Operators({ user }) {
         )}
 
         {/* List of operators */}
+
+         {user.role === 'admin' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            { operators.map((operator, index) => operator.station  && (
+              <div
+                key={operator._id}
+                className="card fade-in-up hover:shadow-lg transition-shadow"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-white font-heading font-bold text-xl">
+                        {operator.employeeNumber}
+                      </span>
+                      <span className="text-white font-heading font-bold text-xl">
+                        {operator.fullName.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <h3 className="font-heading font-bold text-lg text-slate-900 mb-1">
+                      {operator.fullName}
+                    </h3>
+                    <div className="flex items-center gap-2 text-slate-600 mb-2">
+                      <Mail size={14} />
+                      <p className="font-mono text-xs">{operator.position}</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <Calendar size={14} />
+                      <p className="font-mono text-xs">
+                        Created: {new Date(operator.createdAt).toLocaleDateString('en-US')}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Solo QC puede eliminar */}
+                  {user.role === 'lead' && (
+                    <button
+                      onClick={() => handleDelete(operator._id)}
+                      className="p-2 hover:bg-red-50 rounded transition-colors"
+                      title="Remove operator"
+                    >
+                      <Trash2 size={16} className="text-red-600" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="pt-3 border-t border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs uppercase tracking-wider text-slate-500">
+                      {/* ID: {operator._id.slice(-6)} */}
+                      ID: {operator.employeeNumber}
+                    </span>
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold uppercase rounded">
+                      Operator
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+
+
         {operators.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {operators.map((operator, index) => operator.station === user.station && (
+            { operators.map((operator, index) => operator.station === user.station  && (
               <div
                 key={operator._id}
                 className="card fade-in-up hover:shadow-lg transition-shadow"

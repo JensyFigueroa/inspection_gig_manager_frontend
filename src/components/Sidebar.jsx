@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, LogOut, Shield, TruckIcon, Notebook } from 'lucide-react';
+import logoRev from '../assets/logoRev.png'
 
 export default function Sidebar({ user }) {
   const userRole = user.role;
@@ -50,29 +51,21 @@ export default function Sidebar({ user }) {
     <div className="sidebar noise-bg">
       
       <div className="mb-12">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-10">
           {/* <Shield size={28} className="text-[#FF5722]" /> */}
           <div className="flex items-center gap-2">
-            <div className="bg-red-500 p-1.5 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list w-6 h-4 text-white" aria-hidden="true">
-              <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-              <path d="M12 11h4"></path><path d="M12 16h4"></path>
-              <path d="M8 11h.01"></path>
-              <path d="M8 16h.01"></path>
-              </svg>
-            </div>
+            <div className="logo-cell w-26 h-20 bg-transparent">
+              <img src={logoRev} alt="" className='w-full h-full object-contain' />
             <h1 className="font-heading font-black text-xl uppercase tracking-tight leading-none">
               GigManager
             </h1>
+            </div>
           </div>
           <div>
 
           </div>
         </div>
-        <div className={`inline-block px-3 py-1 ${roleBadge.color} text-white text-xs font-bold uppercase rounded-sm`}>
-          {roleBadge.text}
-        </div>
+        
       </div>
 
       <nav className="mb-12">
@@ -95,7 +88,11 @@ export default function Sidebar({ user }) {
         })}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-slate-700">
+        <div className={`inline-block px-3 py-1 ${roleBadge.color} text-white text-xs font-bold uppercase rounded-sm`}>
+          {roleBadge.text}
+        </div>
+
+      <div className="mt-auto pt-6 border-t border-slate-700">       
         <div className="mb-4 px-2">
           <p className="font-mono text-xs uppercase tracking-wider text-slate-500 mb-1">User</p>
           <p className="font-body text-sm text-white font-semibold">{user?.name}</p>

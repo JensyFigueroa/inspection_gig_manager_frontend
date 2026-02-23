@@ -43,7 +43,6 @@
   font-family: 'Chivo', sans-serif;
   border: none;
   cursor: pointer;
-
 }
 
 .btn-primary:hover {
@@ -144,7 +143,7 @@
 
 .sidebar {
   width: 16rem;
-  background-color: #1e293b;
+  background-color: #2d3033;
   color: white;
   height: 100vh;
   position: fixed;
@@ -175,7 +174,7 @@
 }
 
 .sidebar-link.active {
-  background-color: #ff1313;
+  background-color: #F20828;
   color: white;
 }
 

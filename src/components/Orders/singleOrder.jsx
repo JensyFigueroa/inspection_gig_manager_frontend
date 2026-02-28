@@ -17,15 +17,17 @@ const gigsByTruck = flatGigs.reduce((acc, gig) => {
       truckNumber: truck,
       customerName: gig.customerName,
       station: gig.station, // podemos tomar la primera estación
-      statusCounts: { completed: 0, inProgress: 0, pending: 0 },
+      statusCounts: { completed: 0, inProgress: 0, pending: 0, approved: 0 },
       createdAt:gig.createdAt
     };
   }
 
   // Sumar según el estado
+  if (gig.inspectionStatus === "approved") acc[truck].statusCounts.approved += 1;
   if (gig.status === "completed") acc[truck].statusCounts.completed += 1;
   else if (gig.status === "in-progress") acc[truck].statusCounts.inProgress += 1;
   else if (gig.status === "pending") acc[truck].statusCounts.pending += 1;
+
 
   return acc;
 }, {});
@@ -72,19 +74,26 @@ const uniqueGigs = Object.values(gigsByTruck);
     </div>
 
     {/* Progress Bar */}
-        <div className="d-flex justify-content-end">
+      <div className="d-flex justify-content-end">
         <div className="progress w-25 mt-3" role="progressbar">
             <div className="progress-bar progress-bar-striped progress-bar-animated" style={{width:  `${
-      (
-        gig.statusCounts.completed /
-        (gig.statusCounts.completed +
-         gig.statusCounts.inProgress +
-         gig.statusCounts.pending)
-      * 100
-      ).toFixed(0)
-      }%`}}>{((gig.statusCounts.completed/(gig.statusCounts.completed + gig.statusCounts.inProgress + gig.statusCounts.pending))*100).toFixed(0)} %</div>
+              (gig.statusCounts.approved /
+              (gig.statusCounts.completed +
+              gig.statusCounts.inProgress +
+              gig.statusCounts.pending) * 100).toFixed(0)
+            }%`}}>{((gig.statusCounts.approved/(gig.statusCounts.completed + gig.statusCounts.inProgress + gig.statusCounts.pending))*100).toFixed(0)} %</div>
         </div>
+      </div>
+      {/* <div className="d-flex justify-content-end">
+        <div className="progress w-25 mt-3" role="progressbar">
+            <div className="progress-bar progress-bar-striped progress-bar-animated" style={{width:  `${
+              (gig.statusCounts.completed /
+              (gig.statusCounts.completed +
+              gig.statusCounts.inProgress +
+              gig.statusCounts.pending) * 100).toFixed(0)
+            }%`}}>{((gig.statusCounts.completed/(gig.statusCounts.completed + gig.statusCounts.inProgress + gig.statusCounts.pending))*100).toFixed(0)} %</div>
         </div>
+      </div> */}
 
   </div>
 ))

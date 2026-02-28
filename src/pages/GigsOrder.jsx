@@ -28,6 +28,13 @@ export default function GigsOrder ({user}) {
     gigInfo: null
   });
 
+  // const [formData, setFormData] = useState({
+  //     status: '',
+  //     inspectionStatus:'',  
+  //   });
+
+  //   console.log(formData)
+
   useEffect(() => {
     loadData(wkorder);
   }, []);
@@ -87,7 +94,9 @@ const salesEng = gigs.find(
       'pending': 'status-pending',
       'in-progress': 'status-in-progress',
       'completed': 'status-completed',
-      'blocked': 'bg-red-100 text-red-800 border-red-300'
+      'blocked': 'bg-red-100 text-red-800 border-red-300',
+      'approved': 'bg-green-100 text-green-800 border-green-300',
+      'rejected': 'bg-red-100 text-red-800 border-red-300'
     };
     return `status-badge ${classes[status] || ''}`;
   };
@@ -120,7 +129,8 @@ const salesEng = gigs.find(
     setEditingGig(gig);
     setShowModal(true);
   };
-    const handleAproved = async(gigId, e) => {
+    
+  const handleAproved = async(gigId, e) => {
     e.stopPropagation();
    try {
       
@@ -133,10 +143,17 @@ const salesEng = gigs.find(
     }
   }
   
-    const handleRejected = (gig, e) => {
+    const handleRejected = async(gigId, e) => {
     e.stopPropagation();
-    // setEditingGig(gig);
-    // setShowModal(true);
+    try {
+      
+        await authAxios.post(`/gigs/${gigId}/rejected`,  {inspectionStatus: 'rejected', status: 'pending'});
+        toast.success('Gig Rejected');
+   
+      loadData(wkorder);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error processing action');
+    }
   };
 
   const openWorkerActionModal = (action, gig, e) => {
@@ -306,22 +323,19 @@ const salesEng = gigs.find(
                     </span>
                   </td>
                   <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
-                    <span className={getStatusBadgeClass(gig.status)}>
-                      {/* {getStatusText(gig.status)} */}
-                      
-                    </span>
+                    {gig.inspectionStatus === 'approved' && 
+                        <span className={getStatusBadgeClass(gig.inspectionStatus)}>APPROVED</span>
+                      }
+                    
                   </td>
                   <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
-                    <span className={getStatusBadgeClass(gig.status)}>
-                      {/* {getStatusText(gig.status)} */}
-                      {gigs.status === 'completed' 
-                      ? 
-                        <Star className="w-6 h-6 text-red-500 fill-yellow-500" /> 
-                      :
-                        <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
-                      }
+                     {gig.inspectionStatus === 'rejected' && 
+                        <span className={getStatusBadgeClass(gig.inspectionStatus)}>
                       
-                    </span>
+                          <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
+                        
+                        </span>
+                      }  
                   </td>
 
                   {/* <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
@@ -423,8 +437,51 @@ const salesEng = gigs.find(
                         </>
                       )}
 
-                      { user.role === 'qc' && gig.status === 'completed' &&(
+                      {user.role === 'qc' && gig.status === 'completed' && (
+  <div className="flex gap-2">
+    
+    {/* Approved Button */}
+    <button
+      onClick={(e) => handleAproved(gig._id, e)}
+      disabled={gig.inspectionStatus === 'approved'}
+      className={`p-2 rounded transition-colors
+        ${gig.inspectionStatus === 'approved'
+          ? 'bg-green-100 cursor-not-allowed opacity-60'
+          : 'hover:bg-green-50'}
+      `}
+      title="Approved"
+    >
+      <CheckCircle2Icon className="w-6 h-6 text-green-500" />
+    </button>
+
+    {/* Rejected Button */}
+    <button
+      onClick={(e) => handleRejected(gig._id, e)}
+      disabled={gig.inspectionStatus === 'rejected'}
+      className={`p-2 rounded transition-colors
+        ${gig.inspectionStatus === 'rejected'
+          ? 'bg-red-100 cursor-not-allowed opacity-60'
+          : 'hover:bg-red-50'}
+      `}
+      title="Rejected"
+    >
+      <XCircleIcon className="w-6 h-6 text-red-500" />
+    </button>
+
+  </div>
+)}
+
+                      {/* { user.role === 'qc' && gig.status === 'completed' &&(
                         <>
+                        {gig.inspectionStatus === 'approved' ? (
+                            <button
+                            onClick={(e) => handleRejected(gig._id, e)}
+                            className="p-2 hover:bg-red-50 rounded transition-colors"
+                            title="Rejected"
+                          >
+                            <XCircleIcon className="w-6 h-6 text-red-500" />
+                          </button>
+                        ) : (
                           <button
                             onClick={(e) => handleAproved(gig._id, e)}
                             className="p-2 hover:bg-green-50 rounded transition-colors"
@@ -432,15 +489,11 @@ const salesEng = gigs.find(
                           >
                             <CheckCircle2Icon className="w-6 h-6 text-green-500" />
                           </button>
-                          <button
-                            onClick={(e) => handleRejected(gig._id, e)}
-                            className="p-2 hover:bg-red-50 rounded transition-colors"
-                            title="Rejected"
-                          >
-                            <XCircleIcon className="w-6 h-6 text-red-500" />
-                          </button>
+                        )}
+                          
+                          
                         </>
-                      )}
+                      )} */}
                     </div>
                   </td>
                   

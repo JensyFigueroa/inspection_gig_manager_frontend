@@ -3,7 +3,7 @@ import { ResponsiveLine } from "@nivo/line";
 import { ResponsiveBar } from '@nivo/bar';
 import styles from '../pages/statistics.module.css';
 import Sidebar from '../components/Sidebar'
-import DPUTracker from '../components/DPUTable/DPUTracker';
+import DPUTracker from '../components/DPUTracker/DPUTracker';
 
 const Statistics = ({user}) => {
 

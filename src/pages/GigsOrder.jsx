@@ -4,7 +4,7 @@ import Sidebar from '../components/Sidebar';
 import styles from '../pages/statistics.module.css';
 import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading, Star, XCircleIcon, CheckCircleIcon, CheckCircle2Icon } from 'lucide-react';
+import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading, Star, XCircleIcon, CheckCircleIcon, CheckCircle2Icon, Pause } from 'lucide-react';
 import WorkerActionModal from '../components/WorkerActionModal';
 import CreateGigModal from '../components/CreateGigModal';
 
@@ -12,6 +12,7 @@ export default function GigsOrder ({user}) {
   const navigate = useNavigate();
   const { wkorder } = useParams();
   const [gigs, setGigs] = useState([]);
+  const [comments, setComments] = useState([]);
   const [users, setUsers] = useState([]);
   const [operators, setOperators] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -42,14 +43,17 @@ export default function GigsOrder ({user}) {
   const loadData = async (wkorder) => {
     try {
       const [gigsRes, usersRes, operatorsRes] = await Promise.all([
-         authAxios.get('/gigs/'),
+        authAxios.get('/gigs/'),         
         authAxios.get('/users'),
         authAxios.get('/operators'),
       ]);
-
-      setGigs(gigsRes.data.filter(gigs => gigs.truckNumber === wkorder && gigs));
+      
+      setGigs(gigsRes.data.gigs.filter(gigs => gigs.truckNumber === wkorder && gigs));
+      setComments(gigsRes.data.comments);
       setUsers(usersRes.data);
       setOperators(operatorsRes.data);
+   
+      
       
     } catch (error) {
       toast.error('Error loading data');
@@ -57,6 +61,8 @@ export default function GigsOrder ({user}) {
       setLoading(false);
     }
   };
+
+  console.log(comments)
 
   const handleOperatorChange = async (gigId, employeeNumber) => {
       
@@ -94,7 +100,7 @@ const salesEng = gigs.find(
       'pending': 'status-pending',
       'in-progress': 'status-in-progress',
       'completed': 'status-completed',
-      'blocked': 'bg-red-100 text-red-800 border-red-300',
+      'paused': 'bg-blue-100 text-blue-800 border-blue-300',
       'approved': 'bg-green-100 text-green-800 border-green-300',
       'rejected': 'bg-red-100 text-red-800 border-red-300'
     };
@@ -106,7 +112,7 @@ const salesEng = gigs.find(
       'pending': 'Pending',
       'in-progress': 'In Progress',
       'completed': 'Completed',
-      'blocked': 'Blocked'
+      'paused': 'Paused'
     };
     return texts[status] || status;
   };
@@ -175,13 +181,13 @@ const salesEng = gigs.find(
       
       if (action === 'start') {
         await authAxios.post(`/gigs/${gigId}/start`, data);
-        toast.success('Gig iniciado');
+        toast.success('Gig started');
       } else if (action === 'complete') {
         await authAxios.post(`/gigs/${gigId}/complete`, data);
-        toast.success('Gig completado');
-      } else if (action === 'block') {
-        await authAxios.post(`/gigs/${gigId}/block`, data);
-        toast.success('Gig bloqueado');
+        toast.success('Gig completed');
+      } else if (action === 'pause') {
+        await authAxios.post(`/gigs/${gigId}/pause`, data);
+        toast.success('Gig paused');
       }
 
       loadData(wkorder);
@@ -247,7 +253,7 @@ const salesEng = gigs.find(
 
           <div className="mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex gap-2">
-            {['all', 'pending', 'in-progress', 'completed', 'blocked'].map(status => (
+            {['all', 'pending', 'in-progress', 'completed', 'paused'].map(status => (
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
@@ -260,7 +266,7 @@ const salesEng = gigs.find(
                 {status === 'all' ? 'All' : 
                  status === 'pending' ? 'Pending' : 
                  status === 'in-progress' ? 'In Progress' : 
-                 status === 'completed' ? 'Completed' : 'Blocked'}
+                 status === 'completed' ? 'Completed' : 'Paused'}
               </button>
             ))}
           </div>
@@ -271,6 +277,7 @@ const salesEng = gigs.find(
           <table className="w-full">
             <thead>
               <tr>
+                <th className="table-header text-left">Items #</th>                
                 <th className="table-header text-left">Work Order #</th>                
                 <th className="table-header text-left">Station</th>
                 <th className="table-header text-left">Description</th>
@@ -278,6 +285,7 @@ const salesEng = gigs.find(
                 <th className="table-header text-left">Status</th>
                 <th className="table-header text-left">Pass</th>
                 <th className="table-header text-left">Fail</th>
+                <th className="table-header text-left">Comments</th>
                 <th className="table-header text-left">Operator</th>
                 <th className="table-header text-left">Inspector</th>
                 <th className="table-header text-center">Actions</th>                
@@ -291,6 +299,7 @@ const salesEng = gigs.find(
                   style={{ animationDelay: `${index * 50}ms` }}
                   // onClick={() => navigate(`/gig/${gig._id}`)}
                 >
+                  <td className="p-4 font-mono text-sm font-bold text-slate-900">{index + 1}</td>
                   <td className="p-4 font-mono text-sm font-bold text-slate-900" onClick={() => navigate(`/gig/${gig._id}`)}>{gig.truckNumber}</td>                  
                   <td className="p-4 font-mono text-sm font-medium text-slate-900" onClick={() => navigate(`/gig/${gig._id}`)}>{gig.station}</td>
                   <td className="p-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs" onClick={() => navigate(`/gig/${gig._id}`)}>
@@ -317,6 +326,7 @@ const salesEng = gigs.find(
                       </div>
                     )}
                   </td>
+                  {/* Approved */}
                   <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
                     <span className={getStatusBadgeClass(gig.status)}>
                       {getStatusText(gig.status)}
@@ -328,6 +338,7 @@ const salesEng = gigs.find(
                       }
                     
                   </td>
+                  {/* Fail */}
                   <td className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
                      {gig.inspectionStatus === 'rejected' && 
                         <span className={getStatusBadgeClass(gig.inspectionStatus)}>
@@ -336,6 +347,15 @@ const salesEng = gigs.find(
                         
                         </span>
                       }  
+                  </td>
+                  <td  className="p-4" onClick={() => navigate(`/gig/${gig._id}`)}>
+                    {comments.filter(comment => comment.gigId === gig._id).length > 0 ? (
+                      <span className="text-sm text-slate-600">
+                        <i class="bi bi-chat-text-fill fs-2 text-primary"></i>
+                      </span>
+                    ) : (
+                      <span className="text-sm text-slate-400"></span>
+                    )}
                   </td>
 
                   {/* <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
@@ -395,16 +415,16 @@ const salesEng = gigs.find(
                                 Complete
                               </button>
                               <button
-                                onClick={(e) => openWorkerActionModal('block', gig, e)}
-                                className="px-3 py-1 bg-red-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-red-700 transition-colors flex items-center gap-1"
-                                title="Bloquear"
+                                onClick={(e) => openWorkerActionModal('pause', gig, e)}
+                                className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                title="Pause"
                               >
-                                <Ban size={14} />
-                                Block
+                                <Pause size={14} />
+                                Pause
                               </button>
                             </>
                           )}
-                          {gig.status === 'blocked' && (
+                          {gig.status === 'paused' && (
                             <button
                               onClick={(e) => openWorkerActionModal('start', gig, e)}
                               className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
@@ -438,38 +458,38 @@ const salesEng = gigs.find(
                       )}
 
                       {user.role === 'qc' && gig.status === 'completed' && (
-  <div className="flex gap-2">
-    
-    {/* Approved Button */}
-    <button
-      onClick={(e) => handleAproved(gig._id, e)}
-      disabled={gig.inspectionStatus === 'approved'}
-      className={`p-2 rounded transition-colors
-        ${gig.inspectionStatus === 'approved'
-          ? 'bg-green-100 cursor-not-allowed opacity-60'
-          : 'hover:bg-green-50'}
-      `}
-      title="Approved"
-    >
-      <CheckCircle2Icon className="w-6 h-6 text-green-500" />
-    </button>
+                        <div className="flex gap-2">
+                          
+                          {/* Approved Button */}
+                          <button
+                            onClick={(e) => handleAproved(gig._id, e)}
+                            disabled={gig.inspectionStatus === 'approved'}
+                            className={`p-2 rounded transition-colors
+                              ${gig.inspectionStatus === 'approved'
+                                ? 'bg-green-100 cursor-not-allowed opacity-60'
+                                : 'hover:bg-green-50'}
+                            `}
+                            title="Approved"
+                          >
+                            <CheckCircle2Icon className="w-6 h-6 text-green-500" />
+                          </button>
 
-    {/* Rejected Button */}
-    <button
-      onClick={(e) => handleRejected(gig._id, e)}
-      disabled={gig.inspectionStatus === 'rejected'}
-      className={`p-2 rounded transition-colors
-        ${gig.inspectionStatus === 'rejected'
-          ? 'bg-red-100 cursor-not-allowed opacity-60'
-          : 'hover:bg-red-50'}
-      `}
-      title="Rejected"
-    >
-      <XCircleIcon className="w-6 h-6 text-red-500" />
-    </button>
+                          {/* Rejected Button */}
+                          <button
+                            onClick={(e) => handleRejected(gig._id, e)}
+                            disabled={gig.inspectionStatus === 'rejected'}
+                            className={`p-2 rounded transition-colors
+                              ${gig.inspectionStatus === 'rejected'
+                                ? 'bg-red-100 cursor-not-allowed opacity-60'
+                                : 'hover:bg-red-50'}
+                            `}
+                            title="Rejected"
+                          >
+                            <XCircleIcon className="w-6 h-6 text-red-500" />
+                          </button>
 
-  </div>
-)}
+                        </div>
+                      )}
 
                       {/* { user.role === 'qc' && gig.status === 'completed' &&(
                         <>

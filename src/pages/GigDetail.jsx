@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import Sidebar from '../components/Sidebar';
 import PhotoUploader from '../components/PhotoUploader';
 import WorkerActionModal from '../components/WorkerActionModal';
-import { ArrowLeft, Image as ImageIcon, X, User, Clock, AlertCircle, Play, CheckCircle, Ban } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, X, User, Clock, AlertCircle, Play, CheckCircle, Ban, Pause } from 'lucide-react';
 
 export default function GigDetail({user}) {
   const { gigId } = useParams();
@@ -117,9 +117,9 @@ export default function GigDetail({user}) {
       } else if (action === 'complete') {
         await authAxios.post(`/gigs/${gigId}/complete`, data);
         toast.success('Gig completed');
-      } else if (action === 'block') {
-        await authAxios.post(`/gigs/${gigId}/block`, data);
-        toast.success('Gig blocked');
+      } else if (action === 'pause') {
+        await authAxios.post(`/gigs/${gigId}/pause`, data);
+        toast.success('Gig paused');
       }
 
       loadGigData();
@@ -133,7 +133,7 @@ export default function GigDetail({user}) {
       'pending': 'status-pending',
       'in-progress': 'status-in-progress',
       'completed': 'status-completed',
-      'blocked': 'bg-red-100 text-red-800 border-red-300'
+      'paused': 'bg-blue-100 text-blue-800 border-blue-300'
     };
     return `status-badge ${classes[status] || ''}`;
   };
@@ -143,12 +143,12 @@ export default function GigDetail({user}) {
       'pending': 'Pending',
       'in-progress': 'In Progress',
       'completed': 'Completed',
-      'blocked': 'Blocked'
+      'paused': 'Paused'
     };
     return texts[status] || status;
   };
 
-  const getBlockedReasonText = (reason) => {
+  const getPausedReasonText = (reason) => {
     const texts = {
       'missing-parts': 'Missing Parts',
       'depends-previous-station': 'Depends on Previous Station',
@@ -172,10 +172,8 @@ export default function GigDetail({user}) {
       <Sidebar user={user} />
       
       <div className="flex-1 ml-64 p-8 lg:p-12 bg-gray-50 min-h-screen">
-        <button
-          onClick={() => navigate(`/gigsorder/${gigs.truckNumber}`)}
-          className="flex items-center gap-2 font-body text-slate-600 hover:text-slate-900 mb-6 transition-colors"
-        >
+        <button onClick={() => navigate(`/gigsorder/${gigs.truckNumber}`)}
+          className="btn btn-primary d-flex align-items-center gap-2 mb-3">
           <ArrowLeft size={20} />
           Back
         </button>
@@ -219,15 +217,15 @@ export default function GigDetail({user}) {
                           Complete
                         </button>
                         <button
-                          onClick={() => openWorkerActionModal('block')}
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold uppercase text-sm py-2 px-4 rounded-sm transition-colors flex items-center gap-2"
+                          onClick={() => openWorkerActionModal('pause')}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-sm py-2 px-4 rounded-sm transition-colors flex items-center gap-2"
                         >
-                          <Ban size={18} />
-                          Block
+                          <Pause size={18} />
+                          Pause
                         </button>
                       </>
                     )}
-                    {gigs.status === 'blocked' && (
+                    {gigs.status === 'paused' && (
                       <button
                         onClick={() => openWorkerActionModal('start')}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase text-sm py-2 px-4 rounded-sm transition-colors flex items-center gap-2"
@@ -322,46 +320,46 @@ export default function GigDetail({user}) {
               </div>
             )}
 
-            {/* information blockade */}
-            {gigs.status === 'blocked' && gigs.blockedInfo && (
-              <div className="card bg-red-50 border-red-200">
+            {/* information pause */}
+            {gigs.status === 'paused' && gigs.pausedInfo && (
+              <div className="card bg-blue-50 border-blue-200">
                 <div className="flex items-center gap-2 mb-4">
-                  <AlertCircle size={24} className="text-red-600" />
-                  <h2 className="font-heading font-bold text-xl text-red-900">Gig Blocked</h2>
+                  <AlertCircle size={24} className="text-blue-600" />
+                  <h2 className="font-heading font-bold text-xl text-blue-900">Gig Paused</h2>
                 </div>
                 
                 <div className="space-y-3">
                   <div>
-                    <label className="font-mono text-xs uppercase tracking-wider text-red-700 block mb-1">
+                    <label className="font-mono text-xs uppercase tracking-wider text-blue-700 block mb-1">
                       Reason
                     </label>
                     <p className="font-body font-bold text-red-900">
-                      {getBlockedReasonText(gigs.blockedInfo.reason)}
+                      {getPausedReasonText(gigs.pausedInfo.reason)}
                     </p>
                   </div>
 
-                  {gigs.blockedInfo.note && (
+                  {gigs.pausedInfo.note && (
                     <div>
-                      <label className="font-mono text-xs uppercase tracking-wider text-red-700 block mb-1">
+                      <label className="font-mono text-xs uppercase tracking-wider text-blue-700 block mb-1">
                         Note
                       </label>
-                      <p className="font-body text-red-900">
-                        {gigs.blockedInfo.note}
+                      <p className="font-body text-blue-900">
+                        {gigs.pausedInfo.note}
                       </p>
                     </div>
                   )}
 
                   <div>
-                    <label className="font-mono text-xs uppercase tracking-wider text-red-700 block mb-1">
-                      Blocked by
+                    <label className="font-mono text-xs uppercase tracking-wider text-blue-700 block mb-1">
+                      Paused by
                     </label>
-                    <p className="font-body text-red-900">
-                      <span className="font-bold">{gigs.blockedInfo.blockedBy.workerName}</span>
-                      <span className="text-red-700"> (#{gigs.blockedInfo.blockedBy.workerNumber})</span>
+                    <p className="font-body text-blue-900">
+                      <span className="font-bold">{gigs.pausedInfo.pausedBy.workerName}</span>
+                      <span className="text-blue-700"> (#{gigs.pausedInfo.pausedBy.workerNumber})</span>
                     </p>
-                    <p className="font-mono text-xs text-red-700 mt-1 flex items-center gap-1">
+                    <p className="font-mono text-xs text-blue-700 mt-1 flex items-center gap-1">
                       <Clock size={14} />
-                      {new Date(gigs.blockedInfo.blockedAt).toLocaleString('es-ES')}
+                      {new Date(gigs.pausedInfo.pausedAt).toLocaleString('es-ES')}
                     </p>
                   </div>
                 </div>
@@ -422,11 +420,11 @@ export default function GigDetail({user}) {
                   <div key={comment._id} className="comment-item">
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-body font-semibold text-sm text-slate-900">{comment.authorName}</span>
-                      <span className="font-mono text-xs text-slate-500">
+                      <span className="font-mono text-xs text-slate-500 ">
                         {new Date(comment.createdAt).toLocaleDateString('es-ES')}
                       </span>
                     </div>
-                    <p className="font-body text-sm text-slate-600">{comment.text}</p>
+                    <p className="font-body text-sm text-slate-600 bg-blue-100 p-2 rounded">{comment.text}</p>
                   </div>
                 ))
               ) : (

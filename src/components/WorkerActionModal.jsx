@@ -25,7 +25,7 @@ export default function WorkerActionModal({
       workerName,
     };
 
-    if (action === 'block') {
+    if (action === 'pause') {
       data.reason = reason;
       data.note = note;
     }
@@ -41,8 +41,8 @@ export default function WorkerActionModal({
         return 'Start Gig';
       case 'complete':
         return 'Complete Gig';
-      case 'block':
-        return 'Block Gig';
+      case 'pause':
+        return 'Pause Gig';
       default:
         return '';
     }
@@ -55,8 +55,8 @@ export default function WorkerActionModal({
         return 'Start Gig';
       case 'complete':
         return 'Complete Gig';
-      case 'block':
-        return 'Block Gig';
+      case 'pause':
+        return 'Pause Gig';
       default:
         return '';
     }
@@ -68,8 +68,8 @@ export default function WorkerActionModal({
         return 'bg-orange-500 hover:bg-orange-600';
       case 'complete':
         return 'bg-green-600 hover:bg-green-700';
-      case 'block':
-        return 'bg-red-600 hover:bg-red-700';
+      case 'pause':
+        return 'bg-blue-600 hover:bg-blue-700';
       default:
         return 'bg-blue-600 hover:bg-blue-700';
     }
@@ -99,7 +99,7 @@ export default function WorkerActionModal({
             </label>
             <input
               type="text"
-              className="input-field"
+              className="input-field focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
               placeholder="Ej: TRB-001"
               value={workerNumber}
               onChange={(e) => setWorkerNumber(e.target.value)}
@@ -122,11 +122,11 @@ export default function WorkerActionModal({
             />
           </div>
 
-          {action === 'block' && (
+          {action === 'pause' && (
             <>
               <div>
                 <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
-                  Reason for the blockage *
+                  Reason for the pause *
                 </label>
                 <select
                   className="input-field"

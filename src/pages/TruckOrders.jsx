@@ -23,7 +23,7 @@ export default function TruckOrders({ user }) {
         authAxios.get('/gigs'),
         
       ]);
-      setGigs(gigsRes.data);
+      setGigs(gigsRes.data.gigs);
 
       // console.log(gigsRes.data)
      

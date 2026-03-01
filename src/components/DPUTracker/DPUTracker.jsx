@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import '../DPUTable/DPUTracker.css';
+import React, { useState } from 'react';
+import '../DPUTracker/DPUTracker.css';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import { authAxios } from '../../App';
 import ExcelJS from 'exceljs';
 import LogoRev from '../../assets/logoRev.png'
@@ -24,22 +23,24 @@ function DPUTracker() {
   const [gigsByStation, setGigsByStation] = useState({});
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
 
-  const fetchDPUData = async (start = '', end = '') => {
+  const fetchDPUData = async (start = '') => {
   try {
     setLoading(true);
     
     const params = new URLSearchParams();
     if (start) params.append('startDate', start);
-    if (end) params.append('endDate', end);
+
     
     const queryString = params.toString();
     const url = queryString 
       ? `gigs/dpu-tracker?${queryString}`
       : `gigs/dpu-tracker`;
+
+      console.log(url,'url')
     
     const response = await authAxios.get(url);
+    console.log(response,'response')
     const data = response.data;
     setWeekStarting(data.weekStarting || '');
     setTrucks(data.trucks || []);
@@ -60,16 +61,15 @@ function DPUTracker() {
   const handleSearch = () => {
     // fetchDPUData(startDate, endDate);
     // Validar que ambas fechas estén seleccionadas
-  if (!startDate || !endDate) {
-    alert('Please select a start and end date');
+  if (!startDate) {
+    alert('Please select a start');
     return;
   }
-  fetchDPUData(startDate, endDate);
+  fetchDPUData(startDate);
   };
 
   const handleClear = () => {
     setStartDate('');
-  setEndDate('');
   setTrucks([]);
   setGigsByStation({});
   setWeekStarting('');
@@ -311,7 +311,7 @@ const getBorder = () => ({
   right: { style: 'thin', color: { argb: '9CA3AF' } }
 });
 
-
+console.log(trucks)
 
   return (
     <div className="app-container">
@@ -327,21 +327,27 @@ const getBorder = () => ({
         </div>
         <div className="header-right">
           <span className="filter-label">Filter:</span>
-          <input
+          {/* <input
             type="date"
             className="date-input"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             placeholder="Start"
-          />
-          <span className="date-separator">-</span>
-          <input
-            type="date"
-            className="date-input"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            placeholder="End"
-          />
+          /> */}
+          <input type="date" className="date-input" value={startDate} placeholder="Start"
+            onChange={(e) => {
+            const date = new Date(e.target.value + "T00:00:00");
+            const day = date.getDay();
+
+            if (day !== 1) {
+            alert("You must select a Monday");
+            e.target.value = "";
+           return;
+          }
+
+          setStartDate(e.target.value);
+          }}/>
+          
           <button className="btn-search" onClick={handleSearch}>
             🔍 Search
           </button>

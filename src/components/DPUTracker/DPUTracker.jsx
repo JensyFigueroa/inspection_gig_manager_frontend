@@ -311,8 +311,6 @@ const getBorder = () => ({
   right: { style: 'thin', color: { argb: '9CA3AF' } }
 });
 
-console.log(trucks)
-
   return (
     <div className="app-container">
       {/* Header */}

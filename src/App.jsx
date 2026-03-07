@@ -12,7 +12,9 @@ import { Toaster } from './components/ui/sonner';
 import CreateGigModal from './components/CreateGigModal';
 import Statistics from './pages/Statistics';
 import GigsOrder from './pages/GigsOrder';
-
+import TasksOrder from './components/TasksOrder/TasksOrder'; // NUEVO
+import TaskDetail from './pages/TaskDetail'; // NUEVO (crear si no existe)
+import Notifications from './pages/Notifications'; // NUEVO (opcional)
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -72,7 +74,7 @@ function App() {
         </div>
       );
     }
-    
+
     return user ? children : <Navigate to="/auth" />;
   };
 
@@ -81,13 +83,20 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth setUser={setUser} />} />
-          {/* <Route path="/" element={<ProtectedRoute><Dashboard user={user} /></ProtectedRoute>} /> */}
           <Route path="/" element={<ProtectedRoute><TruckOrders user={user} /></ProtectedRoute>} />
+          
+          {/* Gigs Routes */}
           <Route path="/gigsorder/:wkorder" element={<ProtectedRoute><GigsOrder user={user} /></ProtectedRoute>} />
           <Route path="/gig/:gigId" element={<ProtectedRoute><GigDetail user={user}/></ProtectedRoute>} />
+          
+          {/* Tasks Routes - NUEVAS */}
+          <Route path="/tasksorder/:wkorder" element={<ProtectedRoute><TasksOrder user={user} /></ProtectedRoute>} />
+          <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetail user={user}/></ProtectedRoute>} />
+          
+          {/* Other Routes */}
           <Route path="/operators" element={<ProtectedRoute><Inspectors user={user} /></ProtectedRoute>} />
           <Route path="/statistics" element={<ProtectedRoute><Statistics user={user} /></ProtectedRoute>} />
-
+          <Route path="/notifications" element={<ProtectedRoute><Notifications user={user} /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
       <Toaster position="top-right" />

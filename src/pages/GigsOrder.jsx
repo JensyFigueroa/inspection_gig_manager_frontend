@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Ban, ClockFading, Star, XCircleIcon, CheckCircleIcon, CheckCircle2Icon, Pause } from 'lucide-react';
 import WorkerActionModal from '../components/WorkerActionModal';
 import CreateGigModal from '../components/CreateGigModal';
+import GigsTasksTabs from '../components/GigsTasksTabs';
 
 export default function GigsOrder ({user}) {
   const navigate = useNavigate();
@@ -20,6 +21,14 @@ export default function GigsOrder ({user}) {
   const [editingGig, setEditingGig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [activeTab, setActiveTab] = useState('gigs');
+
+  const handleTabChange = (tab) => {
+  setActiveTab(tab);
+  if (tab === 'tasks') {
+    navigate(`/tasksorder/${wkorder}`);
+  }
+};
 
    // Worker Action Modal
   const [workerActionModal, setWorkerActionModal] = useState({
@@ -250,6 +259,7 @@ const salesEng = gigs.find(
           </div>
 
           <div className={styles.dashboard}>
+            <GigsTasksTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
           <div className="mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex gap-2">

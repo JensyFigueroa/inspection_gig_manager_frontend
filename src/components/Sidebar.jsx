@@ -1,6 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, LogOut, Shield, TruckIcon, Notebook } from 'lucide-react';
 import logoRev from '../assets/logoRev.png'
+import NotificationBell from './NotificationBell';
+
 
 export default function Sidebar({ user }) {
   const userRole = user.role;
@@ -88,12 +90,24 @@ export default function Sidebar({ user }) {
         })}
       </nav>
 
+
+      <div className="flex items-center gap-4">
+  {/* Notification Bell - solo para Lead y QC */}
+  <NotificationBell user={user} />
+  
+  {/* Tu contenido existente del usuario */}
+  <div className="user-info">
+    {/* ... */}
+  </div>
+</div>
+
         <div className={`inline-block px-3 py-1 ${roleBadge.color} text-white text-xs font-bold uppercase rounded-sm`}>
           {roleBadge.text}
         </div>
 
       <div className="mt-auto pt-6 border-t border-slate-700">       
         <div className="mb-4 px-2">
+          
           <p className="font-mono text-xs uppercase tracking-wider text-slate-500 mb-1">User</p>
           <p className="font-body text-sm text-white font-semibold">{user?.name}</p>
           <p className="font-mono text-xs text-slate-400">{user?.email}</p>

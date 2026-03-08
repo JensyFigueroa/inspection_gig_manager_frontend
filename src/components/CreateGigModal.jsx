@@ -1,41 +1,50 @@
-import { useState, useEffect } from 'react';
-import { authAxios } from '../App';
-import { toast } from 'sonner';
-import { X } from 'lucide-react';
-import PhotoUploader from './PhotoUploader';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { authAxios } from "../App";
+import { toast } from "sonner";
+import { X } from "lucide-react";
+import PhotoUploader from "./PhotoUploader";
+import { useNavigate } from "react-router-dom";
+import DescriptionAutocomplete from "./DescriptionAutocomplete";
 
-export default function CreateGigModal({ onClose, onSuccess, editingGig, user, wkorder, customerWK, salesEng}) {
-      const navigate = useNavigate();
+export default function CreateGigModal({
+  onClose,
+  onSuccess,
+  editingGig,
+  user,
+  wkorder,
+  customerWK,
+  salesEng,
+}) {
+  const navigate = useNavigate();
 
-  const dateNow = new Date()
+  const dateNow = new Date();
 
   const [formData, setFormData] = useState({
-    station: '',
-    description: '',
-    truckNumber: wkorder !== '' ? wkorder : '', 
-    customerName: customerWK !== '' ? customerWK : '',
-    salesEng: salesEng !== '' ? salesEng : '',
-    status: 'pending',
-    inspectionStatus:'',
+    station: "",
+    description: "",
+    truckNumber: wkorder !== "" ? wkorder : "",
+    customerName: customerWK !== "" ? customerWK : "",
+    salesEng: salesEng !== "" ? salesEng : "",
+    status: "pending",
+    inspectionStatus: "",
     employeeNumber: 100000,
-    photos: []
+    photos: [],
   });
   const [loading, setLoading] = useState(false);
- 
+
   useEffect(() => {
     if (editingGig) {
       setFormData({
         station: editingGig.station,
         description: editingGig.description,
-        truckNumber: editingGig.truckNumber || '',
-        customerName: editingGig.customerName || '',
-        salesEng: editingGig.salesEng || '',
+        truckNumber: editingGig.truckNumber || "",
+        customerName: editingGig.customerName || "",
+        salesEng: editingGig.salesEng || "",
         status: editingGig.status,
-        inspectorId: editingGig.inspectorId || '',
-        inspectionStatus:editingGig.inspectionStatus || '',
-        employeeNumber: editingGig.employeeNumber || 'Unassigned',
-        photos: editingGig.photos || []
+        inspectorId: editingGig.inspectorId || "",
+        inspectionStatus: editingGig.inspectionStatus || "",
+        employeeNumber: editingGig.employeeNumber || "Unassigned",
+        photos: editingGig.photos || [],
       });
     }
   }, [editingGig]);
@@ -53,16 +62,16 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
 
       if (editingGig) {
         const res = await authAxios.put(`/gigs/${editingGig._id}`, payload);
-        toast.success('Updated gig');
+        toast.success("Updated gig");
         onSuccess(res.data);
       } else {
-        const res = await authAxios.post('/gigs', payload);
-        toast.success('Gig created');
+        const res = await authAxios.post("/gigs", payload);
+        toast.success("Gig created");
         onSuccess(res.data);
       }
-      // onSuccess(); 
+      // onSuccess();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Error saving gig');
+      toast.error(error.response?.data?.error || "Error saving gig");
     } finally {
       setLoading(false);
     }
@@ -73,17 +82,17 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
   };
 
   const stations = [
-    'Station 1',
-    'Station 2',
-    'Station 3',
-    'Station 4',
-    'Station 5',
-    'Station 6',
-    'Station 7',
-    'Station 8',
-    'Station 9',
-    'Station 10',
-    'Final Station ',  
+    "Station 1",
+    "Station 2",
+    "Station 3",
+    "Station 4",
+    "Station 5",
+    "Station 6",
+    "Station 7",
+    "Station 8",
+    "Station 9",
+    "Station 10",
+    "Final Station ",
   ];
 
   return (
@@ -91,9 +100,12 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
       <div className="bg-white rounded-sm max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-slate-200 p-6 flex justify-between items-center">
           <h2 className="font-heading font-bold text-2xl text-slate-900">
-            {editingGig ? 'Edit Gig' : 'New Gig'}
+            {editingGig ? "Edit Gig" : "New Gig"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 rounded transition-colors"
+          >
             <X size={24} className="text-slate-600" />
           </button>
         </div>
@@ -104,44 +116,64 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Truck Number *
               </label>
-              {formData.truckNumber === '' && formData.truckNumber.lenght
-              ? <input type="text"
-                value={wkorder}
-                onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
-                className="input-field"
-                disabled /> 
-              : <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                className="input-field"
-                placeholder="e.g: 245001"
-                value={formData.truckNumber}
-                onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value.replace(/\D/g,'') })}
-                required
-              />
-              }
+              {formData.truckNumber === "" && formData.truckNumber.lenght ? (
+                <input
+                  type="text"
+                  value={wkorder}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      truckNumber: e.target.value.replace(/\D/g, ""),
+                    })
+                  }
+                  className="input-field"
+                  disabled
+                />
+              ) : (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  className="input-field"
+                  placeholder="e.g: 245001"
+                  value={formData.truckNumber}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      truckNumber: e.target.value.replace(/\D/g, ""),
+                    })
+                  }
+                  required
+                />
+              )}
             </div>
 
             <div>
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Customer *
               </label>
-              {formData.customerName === '' && formData.customerName.lenght
-              ? <input type="text" disabled value={customerWK} className="input-field"/>
-              : <input
-                type="text"
-                className="input-field"
-                placeholder="e.g: Seminole Rescue"
-                value={formData.customerName}
-                onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                required
-              />
-              }
-            </div>            
+              {formData.customerName === "" && formData.customerName.lenght ? (
+                <input
+                  type="text"
+                  disabled
+                  value={customerWK}
+                  className="input-field"
+                />
+              ) : (
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g: Seminole Rescue"
+                  value={formData.customerName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, customerName: e.target.value })
+                  }
+                  required
+                />
+              )}
+            </div>
           </div>
-
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -153,18 +185,22 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
                 className="input-field"
                 placeholder="e.g: Seminole Rescue"
                 value={formData.salesEng}
-                onChange={(e) => setFormData({ ...formData, salesEng: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, salesEng: e.target.value })
+                }
                 required
               />
-            </div>        
-            <div>           
+            </div>
+            <div>
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Station *
               </label>
               <select
                 className="input-field"
                 value={formData.station}
-                onChange={(e) => setFormData({ ...formData, station: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, station: e.target.value })
+                }
                 required
               >
                 <option value="">Select station...</option>
@@ -177,7 +213,7 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
               Description *
             </label>
@@ -187,6 +223,20 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               required
+            />
+          </div> */}
+
+          <div>
+            <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
+              Description *
+            </label>
+            <DescriptionAutocomplete
+              value={formData.description}
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, description: value }))
+              }
+              station={formData.station}
+              placeholder="Start typing to see suggestions..."
             />
           </div>
 
@@ -230,7 +280,7 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
               <label className="font-mono text-xs uppercase tracking-wider text-slate-500 block mb-2">
                 Inpection Date
               </label>
-              <span>{dateNow.toLocaleDateString('en-US')}</span>
+              <span>{dateNow.toLocaleDateString("en-US")}</span>
               {/* <input
                 type="date"
                 className="input-field"
@@ -238,11 +288,9 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
                 onChange={(e) => setFormData({ ...formData, inspectionDate: e.target.value })}
               /> */}
             </div>
+          </div>
 
-            
-          </div>  
-
-          <PhotoUploader 
+          <PhotoUploader
             photos={formData.photos}
             onPhotosChange={handlePhotosChange}
           />
@@ -254,7 +302,7 @@ export default function CreateGigModal({ onClose, onSuccess, editingGig, user, w
               disabled={loading}
               onClick={() => navigate(`/gigsorder/${formData.truckNumber}`)}
             >
-              {loading ? 'Saving...' : (editingGig ? 'Update Gig' : 'Create Gig')}
+              {loading ? "Saving..." : editingGig ? "Update Gig" : "Create Gig"}
             </button>
             <button
               type="button"

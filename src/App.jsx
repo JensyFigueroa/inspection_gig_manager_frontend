@@ -1,20 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Auth from './pages/Auth';
-import Dashboard from './pages/Dashboard';
 import GigDetail from './pages/GigDetail';
 import Inspectors from './pages/Operators';
 import TruckOrders from './pages/TruckOrders';
 import { Toaster } from './components/ui/sonner';
-import CreateGigModal from './components/CreateGigModal';
 import Statistics from './pages/Statistics';
 import GigsOrder from './pages/GigsOrder';
-import TasksOrder from './components/TasksOrder/TasksOrder'; // NUEVO
-import TaskDetail from './pages/TaskDetail'; // NUEVO (crear si no existe)
-import Notifications from './pages/Notifications'; // NUEVO (opcional)
+import TasksOrder from './components/TasksOrder/TasksOrder';
+import TaskDetail from './pages/TaskDetail';
+import Notifications from './pages/Notifications';
+import WorkerEfficiency from './pages/WorkerEfficiency';
+import InactivityWarningModal from './components/InactivityWarningModal';
+import { useInactivityTimeout } from './hooks/useInactivityTimeout';
+import { toast } from 'sonner';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -34,6 +36,15 @@ authAxios.interceptors.request.use((config) => {
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    setUser(null);
+    toast.info('Session expired due to inactivity');
+    window.location.href = '/auth';
+  }, []);
+
+  const { showWarning, remainingTime, dismissWarning } = useInactivityTimeout(handleLogout, null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -74,7 +85,6 @@ function App() {
         </div>
       );
     }
-
     return user ? children : <Navigate to="/auth" />;
   };
 
@@ -89,17 +99,33 @@ function App() {
           <Route path="/gigsorder/:wkorder" element={<ProtectedRoute><GigsOrder user={user} /></ProtectedRoute>} />
           <Route path="/gig/:gigId" element={<ProtectedRoute><GigDetail user={user}/></ProtectedRoute>} />
           
-          {/* Tasks Routes - NUEVAS */}
+          {/* Tasks Routes */}
           <Route path="/tasksorder/:wkorder" element={<ProtectedRoute><TasksOrder user={user} /></ProtectedRoute>} />
           <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetail user={user}/></ProtectedRoute>} />
+          
+          {/* Missing Parts - redirige a Notifications */}
+          <Route path="/missing-parts/:id" element={<ProtectedRoute><Notifications user={user} /></ProtectedRoute>} />
           
           {/* Other Routes */}
           <Route path="/operators" element={<ProtectedRoute><Inspectors user={user} /></ProtectedRoute>} />
           <Route path="/statistics" element={<ProtectedRoute><Statistics user={user} /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications user={user} /></ProtectedRoute>} />
+          <Route path="/efficiency" element={<ProtectedRoute><WorkerEfficiency user={user} /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
+      
       <Toaster position="top-right" />
+      
+      {/* Modal de advertencia - SOLO aparece cuando showWarning es true (1 min antes) */}
+      {user && (
+        <InactivityWarningModal
+          isOpen={showWarning}
+          remainingTime={remainingTime}
+          onStayLoggedIn={dismissWarning}
+          onLogout={handleLogout}
+          userName={user?.fullName}
+        />
+      )}
     </div>
   );
 }

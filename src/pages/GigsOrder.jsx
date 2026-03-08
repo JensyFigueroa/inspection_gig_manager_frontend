@@ -9,6 +9,7 @@ import WorkerActionModal from '../components/WorkerActionModal';
 import CreateGigModal from '../components/CreateGigModal';
 import GigsTasksTabs from '../components/GigsTasksTabs';
 
+
 export default function GigsOrder ({user}) {
   const navigate = useNavigate();
   const { wkorder } = useParams();
@@ -258,8 +259,9 @@ const salesEng = gigs.find(
           )}
           </div>
 
+          <GigsTasksTabs activeTab={activeTab} onTabChange={handleTabChange} />
+          
           <div className={styles.dashboard}>
-            <GigsTasksTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
           <div className="mb-6 flex flex-wrap gap-4 items-end">
           <div className="flex gap-2">

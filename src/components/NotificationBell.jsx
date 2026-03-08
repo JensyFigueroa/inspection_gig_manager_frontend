@@ -13,12 +13,13 @@ export default function NotificationBell({ user }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user && (user.role === 'lead' || user.role === 'qc' || user.role === 'admin')) {
-      fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 30000); // Poll every 30 seconds
-      return () => clearInterval(interval);
-    }
-  }, [user]);
+  if (user && (user.role === 'lead' || user.role === 'qc' || user.role === 'admin')) {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }
+}, [user]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -126,9 +127,9 @@ export default function NotificationBell({ user }) {
   };
 
   // Don't show for workers
-  if (!user || user.role === 'worker') {
-    return null;
-  }
+ if (!user || user.role === 'worker') {
+  return null;
+}
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -164,7 +165,7 @@ export default function NotificationBell({ user }) {
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto">
             {loading ? (
               <div className="p-8 text-center">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>

@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Trash2, Plus, Image as ImageIcon, Play, CheckCircle, Pause, Star, XCircleIcon, CheckCircle2Icon } from 'lucide-react';
 import WorkerActionModal from '../../components/WorkerActionModal';
-import CreateTaskModal from './CreateTeaskModal';
-
+import CreateTaskModal from '../../components/TasksOrder/CreateTaskModal';
+import GigsTasksTabs from '../../components/GigsTasksTabs';
 
 export default function TasksOrder({ user }) {
   const navigate = useNavigate();
@@ -45,6 +45,14 @@ export default function TasksOrder({ user }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handler para cambiar de tab
+  const handleTabChange = (tab) => {
+    if (tab === 'gigs') {
+      navigate(`/gigsorder/${wkorder}`);
+    }
+    // Si es 'tasks', ya estamos aquí
   };
 
   const handleOperatorChange = async (taskId, employeeNumber) => {
@@ -153,7 +161,7 @@ export default function TasksOrder({ user }) {
         toast.success('Task completed');
       } else if (action === 'pause') {
         await authAxios.post(`/tasks/${taskId}/pause`, data);
-        toast.success('Task paused - Notification sent to Lead');
+        toast.success('Task paused - Notification sent');
       }
 
       loadData(wkorder);
@@ -189,7 +197,7 @@ export default function TasksOrder({ user }) {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="font-heading font-black text-4xl uppercase tracking-tight text-slate-900 mb-2">
-              STATION DEFAULT TASKS
+              QUALITY DEPARTMENT INSPECTION SHEET
             </h1>
             <h4 className="font-heading font-black text-2xl uppercase tracking-tight text-slate-800 mb-2">
               Work Order # {wkorder}
@@ -210,6 +218,9 @@ export default function TasksOrder({ user }) {
             </button>
           )}
         </div>
+
+        {/* TABS PARA NAVEGAR ENTRE GIGS Y TASKS */}
+        <GigsTasksTabs activeTab="tasks" onTabChange={handleTabChange} />
 
         <div className={styles.dashboard}>
           <div className="mb-6 flex flex-wrap gap-4 items-end">
@@ -250,143 +261,156 @@ export default function TasksOrder({ user }) {
                 </tr>
               </thead>
               <tbody>
-                {filteredTasks.map((task, index) => (
-                  <tr
-                    key={task._id}
-                    className="table-row fade-in-up"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <td className="p-4 font-mono text-sm font-bold text-slate-900">{index + 1}</td>
-                    <td className="p-4 font-mono text-sm font-bold text-slate-900">{task.taskName}</td>
-                    <td className="p-4 font-mono text-sm font-medium text-slate-900">{task.station}</td>
-                    <td className="p-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs">
-                      {task.description.length > 200 ? `${task.description.substring(0, 200)}...` : task.description}
-                    </td>
-                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                      {task.photos && task.photos.length > 0 ? (
-                        <button
-                          onClick={(e) => handlePhotoClick(task.photos[0], e)}
-                          className="w-12 h-12 rounded-sm overflow-hidden border border-slate-200 hover:border-[#FF5722] transition-colors"
-                        >
-                          <img src={task.photos[0]} alt="Thumbnail" className="w-full h-full object-cover" />
-                        </button>
-                      ) : (
-                        <div className="w-12 h-12 rounded-sm bg-slate-100 flex items-center justify-center border border-slate-200">
-                          <ImageIcon size={20} className="text-slate-400" />
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <span className={getStatusBadgeClass(task.status)}>
-                        {getStatusText(task.status)}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      {task.inspectionStatus === 'approved' && (
-                        <span className={getStatusBadgeClass(task.inspectionStatus)}>APPROVED</span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      {task.inspectionStatus === 'rejected' && (
-                        <span className={getStatusBadgeClass(task.inspectionStatus)}>
-                          <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      {user.role === 'lead' ? (
-                        <select
-                          className="input-field"
-                          value={task.employeeNumber || ''}
-                          onChange={(e) => handleOperatorChange(task._id, e.target.value)}
-                        >
-                          <option>Unassigned</option>
-                          {operators
-                            .filter(op => op.station === task.station)
-                            .map(operator => (
-                              <option key={operator.employeeNumber} value={operator.employeeNumber}>
-                                {operator.fullName}
-                              </option>
-                            ))}
-                        </select>
-                      ) : (
-                        <span className="font-body text-sm text-slate-600">
-                          {operators.find(op => op.employeeNumber === task.employeeNumber)?.fullName || 'Unassigned'}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-center gap-2 flex-wrap">
-                        {(user.role === 'worker' || user.role === 'lead') && (
-                          <>
-                            {task.status === 'pending' && (
-                              <button
-                                onClick={(e) => openWorkerActionModal('start', task, e)}
-                                className="px-3 py-1 bg-orange-500 text-white text-xs font-bold uppercase rounded-sm hover:bg-orange-600 transition-colors flex items-center gap-1"
-                              >
-                                <Play size={14} /> Start
-                              </button>
-                            )}
-                            {task.status === 'in-progress' && (
-                              <>
-                                <button
-                                  onClick={(e) => openWorkerActionModal('complete', task, e)}
-                                  className="px-3 py-1 bg-green-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-green-700 transition-colors flex items-center gap-1"
-                                >
-                                  <CheckCircle size={14} /> Complete
-                                </button>
-                                <button
-                                  onClick={(e) => openWorkerActionModal('pause', task, e)}
-                                  className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
-                                >
-                                  <Pause size={14} /> Pause
-                                </button>
-                              </>
-                            )}
-                            {task.status === 'paused' && (
-                              <button
-                                onClick={(e) => openWorkerActionModal('start', task, e)}
-                                className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
-                              >
-                                <Play size={14} /> Restart
-                              </button>
-                            )}
-                          </>
-                        )}
-
-                        {user.role === 'qc' && (task.status === 'pending' || task.status === 'in-progress') && (
-                          <>
-                            <button onClick={(e) => handleEdit(task, e)} className="p-2 hover:bg-slate-100 rounded transition-colors">
-                              <Pencil size={16} className="w-6 h-6 text-slate-600" />
-                            </button>
-                            <button onClick={(e) => handleDelete(task._id, e)} className="p-2 hover:bg-red-50 rounded transition-colors">
-                              <Trash2 size={16} className="w-6 h-6 text-red-600" />
-                            </button>
-                          </>
-                        )}
-
-                        {user.role === 'qc' && task.status === 'completed' && (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={(e) => handleApproved(task._id, e)}
-                              disabled={task.inspectionStatus === 'approved'}
-                              className={`p-2 rounded transition-colors ${task.inspectionStatus === 'approved' ? 'bg-green-100 cursor-not-allowed opacity-60' : 'hover:bg-green-50'}`}
-                            >
-                              <CheckCircle2Icon className="w-6 h-6 text-green-500" />
-                            </button>
-                            <button
-                              onClick={(e) => handleRejected(task._id, e)}
-                              disabled={task.inspectionStatus === 'rejected'}
-                              className={`p-2 rounded transition-colors ${task.inspectionStatus === 'rejected' ? 'bg-red-100 cursor-not-allowed opacity-60' : 'hover:bg-red-50'}`}
-                            >
-                              <XCircleIcon className="w-6 h-6 text-red-500" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                {filteredTasks.length === 0 ? (
+                  <tr>
+                    <td colSpan="10" className="p-8 text-center text-slate-500">
+                      No tasks found for this work order. 
+                      {user.role === 'qc' && ' Click "New Task" to create one.'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredTasks.map((task, index) => (
+                    <tr
+                      key={task._id}
+                      className="table-row fade-in-up"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <td className="p-4 font-mono text-sm font-bold text-slate-900">{index + 1}</td>
+                      <td className="p-4 font-mono text-sm font-bold text-slate-900" onClick={() => navigate(`/task/${task._id}`)}>
+                        {task.taskName}
+                      </td>
+                      <td className="p-4 font-mono text-sm font-medium text-slate-900" onClick={() => navigate(`/task/${task._id}`)}>
+                        {task.station}
+                      </td>
+                      <td className="p-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs" onClick={() => navigate(`/task/${task._id}`)}>
+                        {task.description.length > 200 ? `${task.description.substring(0, 200)}...` : task.description}
+                      </td>
+                      <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                        {task.photos && task.photos.length > 0 ? (
+                          <button
+                            onClick={(e) => handlePhotoClick(task.photos[0], e)}
+                            className="w-12 h-12 rounded-sm overflow-hidden border border-slate-200 hover:border-[#FF5722] transition-colors"
+                          >
+                            <img src={task.photos[0]} alt="Thumbnail" className="w-full h-full object-cover" />
+                          </button>
+                        ) : (
+                          <div className="w-12 h-12 rounded-sm bg-slate-100 flex items-center justify-center border border-slate-200">
+                            <ImageIcon size={20} className="text-slate-400" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-4" onClick={() => navigate(`/task/${task._id}`)}>
+                        <span className={getStatusBadgeClass(task.status)}>
+                          {getStatusText(task.status)}
+                        </span>
+                      </td>
+                      <td className="p-4" onClick={() => navigate(`/task/${task._id}`)}>
+                        {task.inspectionStatus === 'approved' && (
+                          <span className={getStatusBadgeClass(task.inspectionStatus)}>APPROVED</span>
+                        )}
+                      </td>
+                      <td className="p-4" onClick={() => navigate(`/task/${task._id}`)}>
+                        {task.inspectionStatus === 'rejected' && (
+                          <span className={getStatusBadgeClass(task.inspectionStatus)}>
+                            <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        {user.role === 'lead' ? (
+                          <select
+                            className="input-field"
+                            value={task.employeeNumber || ''}
+                            onChange={(e) => handleOperatorChange(task._id, e.target.value)}
+                          >
+                            <option>Unassigned</option>
+                            {operators
+                              .filter(op => op.station === task.station)
+                              .map(operator => (
+                                <option key={operator.employeeNumber} value={operator.employeeNumber}>
+                                  {operator.fullName}
+                                </option>
+                              ))}
+                          </select>
+                        ) : (
+                          <span className="font-body text-sm text-slate-600">
+                            {operators.find(op => op.employeeNumber === task.employeeNumber)?.fullName || 'Unassigned'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex justify-center gap-2 flex-wrap">
+                          {(user.role === 'worker' || user.role === 'lead') && (
+                            <>
+                              {task.status === 'pending' && (
+                                <button
+                                  onClick={(e) => openWorkerActionModal('start', task, e)}
+                                  className="px-3 py-1 bg-orange-500 text-white text-xs font-bold uppercase rounded-sm hover:bg-orange-600 transition-colors flex items-center gap-1"
+                                >
+                                  <Play size={14} /> Start
+                                </button>
+                              )}
+                              {task.status === 'in-progress' && (
+                                <>
+                                  <button
+                                    onClick={(e) => openWorkerActionModal('complete', task, e)}
+                                    className="px-3 py-1 bg-green-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-green-700 transition-colors flex items-center gap-1"
+                                  >
+                                    <CheckCircle size={14} /> Complete
+                                  </button>
+                                  <button
+                                    onClick={(e) => openWorkerActionModal('pause', task, e)}
+                                    className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                  >
+                                    <Pause size={14} /> Pause
+                                  </button>
+                                </>
+                              )}
+                              {task.status === 'paused' && (
+                                <button
+                                  onClick={(e) => openWorkerActionModal('start', task, e)}
+                                  className="px-3 py-1 bg-blue-600 text-white text-xs font-bold uppercase rounded-sm hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                >
+                                  <Play size={14} /> Restart
+                                </button>
+                              )}
+                            </>
+                          )}
+
+                          {user.role === 'qc' && (task.status === 'pending' || task.status === 'in-progress') && (
+                            <>
+                              <button onClick={(e) => handleEdit(task, e)} className="p-2 hover:bg-slate-100 rounded transition-colors">
+                                <Pencil size={16} className="w-6 h-6 text-slate-600" />
+                              </button>
+                              <button onClick={(e) => handleDelete(task._id, e)} className="p-2 hover:bg-red-50 rounded transition-colors">
+                                <Trash2 size={16} className="w-6 h-6 text-red-600" />
+                              </button>
+                            </>
+                          )}
+
+                          {user.role === 'qc' && task.status === 'completed' && (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => handleApproved(task._id, e)}
+                                disabled={task.inspectionStatus === 'approved'}
+                                className={`p-2 rounded transition-colors ${task.inspectionStatus === 'approved' ? 'bg-green-100 cursor-not-allowed opacity-60' : 'hover:bg-green-50'}`}
+                              >
+                                <CheckCircle2Icon className="w-6 h-6 text-green-500" />
+                              </button>
+                              <button
+                                onClick={(e) => handleRejected(task._id, e)}
+                                disabled={task.inspectionStatus === 'rejected'}
+                                className={`p-2 rounded transition-colors ${task.inspectionStatus === 'rejected' ? 'bg-red-100 cursor-not-allowed opacity-60' : 'hover:bg-red-50'}`}
+                              >
+                                <XCircleIcon className="w-6 h-6 text-red-500" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

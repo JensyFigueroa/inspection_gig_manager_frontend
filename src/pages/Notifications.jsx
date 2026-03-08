@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { authAxios } from '../App';
 import Sidebar from '../components/Sidebar';
 import { toast } from 'sonner';
-import { Bell, Check, CheckCheck, AlertTriangle, Link2, Trash2 } from 'lucide-react';
+import { Bell, Check, CheckCheck, AlertTriangle, Link2, Trash2, ExternalLink, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Notifications({ user }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, unread, read
+  const [filter, setFilter] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,11 +58,17 @@ export default function Notifications({ user }) {
     }
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleViewDetails = (notification) => {
+    // Marcar como leída si no lo está
     if (!notification.isRead) {
       handleMarkAsRead(notification._id);
     }
-    if (notification.relatedGigId) {
+
+    // Navegar según el tipo de notificación
+    if (notification.type === 'missing-parts' && notification.truckNumber) {
+      // Admin ve la lista de missing parts del camión
+      navigate(`/missing-parts/${notification.truckNumber}`);
+    } else if (notification.relatedGigId) {
       navigate(`/gig/${notification.relatedGigId}`);
     } else if (notification.relatedTaskId) {
       navigate(`/task/${notification.relatedTaskId}`);
@@ -90,8 +96,11 @@ export default function Notifications({ user }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="w-12 h-12 border-4 border-[#FF5722] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex">
+        <Sidebar user={user} />
+        <div className="flex-1 ml-64 p-8 lg:p-12 bg-gray-50 min-h-screen flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-[#FF5722] border-t-transparent rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
@@ -149,10 +158,9 @@ export default function Notifications({ user }) {
             filteredNotifications.map(notification => (
               <div
                 key={notification._id}
-                className={`bg-white rounded-lg p-6 shadow-sm cursor-pointer transition-all hover:shadow-md ${
+                className={`bg-white rounded-lg p-6 shadow-sm transition-all hover:shadow-md ${
                   !notification.isRead ? 'border-l-4 border-blue-500' : ''
                 }`}
-                onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex gap-4">
                   <div className="flex-shrink-0">
@@ -166,10 +174,7 @@ export default function Notifications({ user }) {
                       <div className="flex items-center gap-2">
                         {!notification.isRead && (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMarkAsRead(notification._id);
-                            }}
+                            onClick={() => handleMarkAsRead(notification._id)}
                             className="p-1 hover:bg-slate-100 rounded"
                             title="Mark as read"
                           >
@@ -178,10 +183,7 @@ export default function Notifications({ user }) {
                         )}
                         {(user.role === 'qc' || user.role === 'admin') && (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(notification._id);
-                            }}
+                            onClick={() => handleDelete(notification._id)}
                             className="p-1 hover:bg-red-50 rounded"
                             title="Delete"
                           >
@@ -205,6 +207,26 @@ export default function Notifications({ user }) {
                         Paused by: {notification.pausedBy.workerName} ({notification.pausedBy.workerNumber})
                       </p>
                     )}
+
+                    {/* Action Button */}
+                    <div className="mt-4">
+                      <button
+                        onClick={() => handleViewDetails(notification)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+                      >
+                        {notification.type === 'missing-parts' ? (
+                          <>
+                            <Package size={16} />
+                            View Missing Parts List
+                          </>
+                        ) : (
+                          <>
+                            <ExternalLink size={16} />
+                            View Details
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

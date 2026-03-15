@@ -14,6 +14,7 @@ import TasksOrder from './components/TasksOrder/TasksOrder';
 import TaskDetail from './pages/TaskDetail';
 import Notifications from './pages/Notifications';
 import WorkerEfficiency from './pages/WorkerEfficiency';
+import MissingPartsList from './pages/MissingPartsList';
 import InactivityWarningModal from './components/InactivityWarningModal';
 import { useInactivityTimeout } from './hooks/useInactivityTimeout';
 import { toast } from 'sonner';
@@ -88,7 +89,7 @@ function App() {
     return user ? children : <Navigate to="/auth" />;
   };
 
-  return (
+   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
@@ -103,8 +104,8 @@ function App() {
           <Route path="/tasksorder/:wkorder" element={<ProtectedRoute><TasksOrder user={user} /></ProtectedRoute>} />
           <Route path="/task/:taskId" element={<ProtectedRoute><TaskDetail user={user}/></ProtectedRoute>} />
           
-          {/* Missing Parts - redirige a Notifications */}
-          <Route path="/missing-parts/:id" element={<ProtectedRoute><Notifications user={user} /></ProtectedRoute>} />
+          {/* Missing Parts - Usa MissingPartsList component */}
+          <Route path="/missing-parts/:truckNumber" element={<ProtectedRoute><MissingPartsList user={user} /></ProtectedRoute>} />
           
           {/* Other Routes */}
           <Route path="/operators" element={<ProtectedRoute><Inspectors user={user} /></ProtectedRoute>} />

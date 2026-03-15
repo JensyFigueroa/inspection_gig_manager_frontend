@@ -3,7 +3,7 @@ import { X, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { authAxios } from '../App';
 
 const STATIONS = [
-  'Station 1', 'Station 2', 'Station 3', 'Station 4', 'Station 5', 'Station 6',
+  'Station 1', 'Station 2', 'Station 3', 'Station 4', 'Station 5', 'Station 6','Station 9', 'Final Station',
   'Electrico T/S', 'Harness', 'Prep', 'Cab Shop', 'Body Shop', 'Paint'
 ];
 

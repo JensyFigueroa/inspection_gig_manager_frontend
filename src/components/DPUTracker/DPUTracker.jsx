@@ -57,6 +57,10 @@ function DPUTracker() {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [avgDPUData, setAvgDPUData] = useState([]);
 
+  const [weeklyComparisonData, setWeeklyComparisonData] = useState(null);
+  const [loadingComparison, setLoadingComparison] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
+
   const fetchAvgDPUData = async () => {
     try {
       const response = await authAxios.get(
@@ -65,6 +69,32 @@ function DPUTracker() {
       setAvgDPUData(response.data.data || []);
     } catch (error) {
       console.error("Error fetching AVG DPU data:", error);
+    }
+  };
+
+  const fetchWeeklyComparison = async (start = "") => {
+    try {
+      setLoadingComparison(true);
+      setSearchPerformed(true); // Marcar que se realizó una búsqueda
+
+      if (!start) {
+        console.log("No se proporcionó fecha para comparación");
+        return;
+      }
+
+      const url = `gigs/weekly-comparison?currentWeekStart=${start}`;
+      console.log("Fetching comparison URL:", url);
+
+      const response = await authAxios.get(url);
+      console.log("Comparison data received:", response.data);
+
+      setWeeklyComparisonData(response.data);
+    } catch (err) {
+      console.error("Error fetching weekly comparison:", err);
+      // Aún así marcar que se intentó buscar
+      setSearchPerformed(true);
+    } finally {
+      setLoadingComparison(false);
     }
   };
 
@@ -78,21 +108,41 @@ function DPUTracker() {
     try {
       setLoading(true);
 
-      const params = new URLSearchParams();
-      if (start) params.append("startDate", start);
+      if (!start) {
+        console.log("No se proporcionó fecha de inicio");
+        return;
+      }
 
-      const queryString = params.toString();
-      const url = queryString
-        ? `gigs/dpu-tracker?${queryString}`
-        : `gigs/dpu-tracker`;
-
-      console.log(url, "url");
+      const url = `gigs/dpu-tracker?startDate=${start}`;
+      console.log("Fetching URL:", url);
 
       const response = await authAxios.get(url);
-      console.log(response, "response");
+      console.log("Response completa:", response);
+
       const data = response.data;
+      console.log("Data recibida:", data);
+
       setWeekStarting(data.weekStarting || "");
-      setTrucks(data.trucks || []);
+
+      // Asegurar que siempre haya 4 columnas (Mon-Thu)
+      let trucksData = data.trucks || [];
+
+      // Si hay menos de 4 trucks, completar con vacíos
+      const dayOrder = ["Mon", "Tue", "Wed", "Thu"];
+      if (trucksData.length < 4) {
+        const existingDays = trucksData.map((t) => t.day);
+        dayOrder.forEach((day) => {
+          if (!existingDays.includes(day)) {
+            trucksData.push({ truckNumber: "", customerName: "", day: day });
+          }
+        });
+        // Reordenar por día
+        trucksData.sort(
+          (a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day),
+        );
+      }
+
+      setTrucks(trucksData);
       setGigsByStation(data.gigsByStation || {});
     } catch (err) {
       console.error("Error fetching DPU data:", err);
@@ -107,13 +157,12 @@ function DPUTracker() {
   // }, [fetchDPUData]);
 
   const handleSearch = () => {
-    // fetchDPUData(startDate, endDate);
-    // Validar que ambas fechas estén seleccionadas
     if (!startDate) {
-      alert("Please select a start");
+      alert("Please select a start date");
       return;
     }
     fetchDPUData(startDate);
+    fetchWeeklyComparison(startDate); // Agregar esta línea
   };
 
   const handleClear = () => {
@@ -121,6 +170,8 @@ function DPUTracker() {
     setTrucks([]);
     setGigsByStation({});
     setWeekStarting("");
+    setWeeklyComparisonData(null);
+    setSearchPerformed(false); // Agregar esta línea
   };
 
   // Calculation functions
@@ -153,7 +204,7 @@ function DPUTracker() {
   };
 
   const getGigCount = (station, truckNumber) => {
-    if (!truckNumber) return "";
+    if (!truckNumber) return 0;
     return gigsByStation[station]?.[truckNumber] || 0;
   };
 
@@ -469,6 +520,46 @@ function DPUTracker() {
     right: { style: "thin", color: { argb: "9CA3AF" } },
   });
 
+  // Función para abreviar nombres de estaciones para las gráficas
+  const getStationAbbreviation = (station) => {
+    const abbreviations = {
+      "Station 1": "ST1",
+      "Station 2": "ST2",
+      "Station 3": "ST3",
+      "Station 4": "ST4",
+      "Station 5": "ST5",
+      "Station 6": "ST6",
+      "Electrico T/S": "TS",
+      Harness: "Harn",
+      Prep: "Prep",
+      "Cab Shop": "Cabinet",
+      "Body Shop": "Body",
+      Paint: "Paint",
+    };
+    return abbreviations[station] || station;
+  };
+
+  // Preparar datos para la gráfica de 3 semanas
+  const threeWeeksChartData = weeklyComparisonData
+    ? weeklyComparisonData.stations.map((station) => ({
+        name: getStationAbbreviation(station),
+        fullName: station,
+        startWeek: weeklyComparisonData.startWeek.data[station] || 0,
+        lastWeek: weeklyComparisonData.lastWeek.data[station] || 0,
+        currentWeek: weeklyComparisonData.currentWeek.data[station] || 0,
+      }))
+    : [];
+
+  // Preparar datos para la gráfica de comparación 2 semanas (actual vs anterior)
+  const twoWeeksChartData = weeklyComparisonData
+    ? weeklyComparisonData.stations.map((station) => ({
+        name: getStationAbbreviation(station),
+        fullName: station,
+        lastWeek: weeklyComparisonData.lastWeek.data[station] || 0,
+        currentWeek: weeklyComparisonData.currentWeek.data[station] || 0,
+      }))
+    : [];
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -548,7 +639,7 @@ function DPUTracker() {
       <div className="content-area ">
         {activeTab === "tabla" ? (
           <div className="table-container" data-testid="table-container">
-            {trucks.filter((t) => t.truckNumber).length === 0 ? (
+            {!weekStarting ? (
               <div className="empty-state">
                 <p>Select a date range and click "Search" to view the data</p>
               </div>
@@ -560,7 +651,7 @@ function DPUTracker() {
                   </h1>
                 </div>
 
-                <table className="tracker-table ">
+                <table className="tracker-table">
                   <thead>
                     <tr className="info-row">
                       <td className="label-cell">Week starting</td>
@@ -569,7 +660,6 @@ function DPUTracker() {
                       <td className="day-header">Tue truck</td>
                       <td className="day-header">Wed truck</td>
                       <td className="day-header">Thur truck</td>
-
                       <td
                         rowSpan="3"
                         colSpan="2"
@@ -588,7 +678,7 @@ function DPUTracker() {
                       <td className="label-cell">Truck number</td>
                       {trucks.map((truck, idx) => (
                         <td key={`truck-${idx}`} className="truck-number">
-                          {truck.truckNumber}
+                          {truck.truckNumber || "-"}
                         </td>
                       ))}
                     </tr>
@@ -598,7 +688,7 @@ function DPUTracker() {
                       <td className="label-cell">Customer</td>
                       {trucks.map((truck, idx) => (
                         <td key={`customer-${idx}`} className="customer-name">
-                          {truck.customerName}
+                          {truck.customerName || "-"}
                         </td>
                       ))}
                     </tr>
@@ -627,7 +717,9 @@ function DPUTracker() {
                         </td>
                         {trucks.map((truck, tIdx) => (
                           <td key={`${station}-${tIdx}`} className="gig-count">
-                            {getGigCount(station, truck.truckNumber)}
+                            {truck.truckNumber
+                              ? getGigCount(station, truck.truckNumber)
+                              : "-"}
                           </td>
                         ))}
                         <td className="total-value">
@@ -644,7 +736,9 @@ function DPUTracker() {
                       <td className="total-label-text">Total</td>
                       {trucks.map((truck, idx) => (
                         <td key={`col-total-${idx}`} className="column-total">
-                          {getColumnTotal(truck.truckNumber)}
+                          {truck.truckNumber
+                            ? getColumnTotal(truck.truckNumber)
+                            : "-"}
                         </td>
                       ))}
                       <td className="grand-total">{getGrandTotal()}</td>
@@ -659,7 +753,7 @@ function DPUTracker() {
           </div>
         ) : (
           <div className="dashboard-container">
-            {/* Stats Cards */}
+             {/* Stats Cards */}
             {/* <div className="stats-cards">
               <div className="stat-card blue">
                 <div className="stat-label">TOTAL PRODUCCIÓN</div>
@@ -678,16 +772,215 @@ function DPUTracker() {
                 <div className="stat-value">🏭 {STATIONS.length}</div>
               </div>
             </div> */}
-
             {/* Charts Grid */}
             <div className="charts-grid">
+              {/* Gráfica 1: Pareto 3 semanas */}
+              <div className="chart-card" style={{ gridColumn: "span 2" }}>
+                <h3 className="chart-title">
+                  📊 Pareto by station, start week, last week, current week - RR
+                  Line
+                </h3>
+                {loadingComparison ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    Loading...
+                  </div>
+                ) : !searchPerformed ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    Select a date and click "Search" to view comparison data
+                  </div>
+                ) : weeklyComparisonData ? (
+                  <>
+                    <p
+                      style={{
+                        textAlign: "center",
+                        fontSize: "12px",
+                        color: "#666",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      Start week - {weeklyComparisonData.startWeek.date} / Last
+                      week - {weeklyComparisonData.lastWeek.date} / Current week
+                      - {weeklyComparisonData.currentWeek.date}
+                    </p>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={threeWeeksChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fontSize: 11 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis domain={[0, "auto"]} allowDataOverflow={false} />
+                        <Tooltip
+                          formatter={(value, name) => {
+                            const labels = {
+                              startWeek: "Start Week",
+                              lastWeek: "Last Week",
+                              currentWeek: "Current Week",
+                            };
+                            return [value, labels[name] || name];
+                          }}
+                          labelFormatter={(label) => {
+                            const item = threeWeeksChartData.find(
+                              (d) => d.name === label,
+                            );
+                            return item ? item.fullName : label;
+                          }}
+                        />
+                        <Legend
+                          formatter={(value) => {
+                            const labels = {
+                              startWeek: "Start Week",
+                              lastWeek: "Last Week",
+                              currentWeek: "Current Week",
+                            };
+                            return labels[value] || value;
+                          }}
+                        />
+                        <Bar
+                          dataKey="startWeek"
+                          fill="#3B82F6"
+                          name="startWeek"
+                        />
+                        <Bar
+                          dataKey="lastWeek"
+                          fill="#F97316"
+                          name="lastWeek"
+                        />
+                        <Bar
+                          dataKey="currentWeek"
+                          fill="#22C55E"
+                          name="currentWeek"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    Error loading data. Please try again.
+                  </div>
+                )}
+              </div>
+
+              {/* Gráfica 2: Comparación semana actual vs anterior */}
+              <div className="chart-card">
+                <h3 className="chart-title">
+                  📊 Pareto by station DPU week{" "}
+                  {weeklyComparisonData?.currentWeek?.date || ""} - RR Line
+                </h3>
+                {loadingComparison ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    Loading...
+                  </div>
+                ) : !searchPerformed ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    No data available
+                  </div>
+                ) : weeklyComparisonData ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={twoWeeksChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis domain={[0, "auto"]} allowDataOverflow={false} />
+                      <Tooltip
+                        formatter={(value, name) => {
+                          const labels = {
+                            lastWeek:
+                              weeklyComparisonData?.lastWeek?.date ||
+                              "Last Week",
+                            currentWeek:
+                              weeklyComparisonData?.currentWeek?.date ||
+                              "Current Week",
+                          };
+                          return [value, labels[name] || name];
+                        }}
+                        labelFormatter={(label) => {
+                          const item = twoWeeksChartData.find(
+                            (d) => d.name === label,
+                          );
+                          return item ? item.fullName : label;
+                        }}
+                      />
+                      <Legend
+                        formatter={(value) => {
+                          if (!weeklyComparisonData) return value;
+                          const labels = {
+                            lastWeek: weeklyComparisonData.lastWeek.date,
+                            currentWeek: weeklyComparisonData.currentWeek.date,
+                          };
+                          return labels[value] || value;
+                        }}
+                      />
+                      <Bar dataKey="lastWeek" fill="#3B82F6" name="lastWeek" />
+                      <Bar
+                        dataKey="currentWeek"
+                        fill="#F97316"
+                        name="currentWeek"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "50px",
+                      color: "#666",
+                    }}
+                  >
+                    No data available
+                  </div>
+                )}
+              </div>
+
+              {/* Gráfica AVG DPU existente */}
               <div className="chart-card">
                 <h3 className="chart-title">📊 AVG DPU RR</h3>
                 <AvgDPUChart />
               </div>
 
+              {/* Gráfica de Total por estación existente */}
               <div className="chart-card">
-                <h3 className="chart-title">📊 Total per station</h3>
+                <h3 className="chart-title">
+                  📊 Total per station (Current Week)
+                </h3>
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={barChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -706,7 +999,8 @@ function DPUTracker() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="chart-card">
+              {/* Gráfica Pie existente */}
+              {/* <div className="chart-card">
                 <h3 className="chart-title">🔵 Distribución por Camión</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
@@ -733,9 +1027,10 @@ function DPUTracker() {
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
+              </div> */}
 
-              <div className="chart-card">
+              {/* Gráfica de barras apiladas existente */}
+              {/* <div className="chart-card">
                 <h3 className="chart-title">
                   📈 Comparativa por Camión y Estación
                 </h3>
@@ -765,9 +1060,10 @@ function DPUTracker() {
                       ))}
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+              </div> */}
 
-              <div className="chart-card">
+              {/* Gráfica de área existente */}
+              {/* <div className="chart-card">
                 <h3 className="chart-title">📈 Tendencia de Producción</h3>
                 <ResponsiveContainer width="100%" height={250}>
                   <AreaChart data={areaChartData}>
@@ -790,48 +1086,36 @@ function DPUTracker() {
                     />
                   </AreaChart>
                 </ResponsiveContainer>
-              </div>
+              </div> */}
             </div>
-
-            {/* Top 5 Stations */}
-            {/* <div className="top-stations">
-              <h3 className="top-title">Top 5 Estaciones con Mayor Producción</h3>
-              <div className="top-cards">
-                {top5Stations.map((station, idx) => (
-                  <div key={station.name} className="top-card">
-                    <div className="top-rank" style={{ backgroundColor: COLORS[idx] }}>{idx + 1}</div>
-                    <div className="top-name">{station.name}</div>
-                    <div className="top-total">{station.total}</div>
-                    <div className="top-avg">Promedio: {station.avg.toFixed(2)}</div>
-                  </div>
-                ))}
-              </div>
-            </div> */}
           </div>
         )}
       </div>
 
       <PrintModal
-        isOpen={showPrintModal}
-        onClose={() => setShowPrintModal(false)}
-        tableData={{ trucks, weekStarting, gigsByStation }}
-        barChartData={barChartData}
-        pieChartData={pieChartData}
-        stackedBarData={stackedBarData}
-        areaChartData={areaChartData}
-        avgDPUData={avgDPUData}
-        trucks={trucks}
-        weekStarting={weekStarting}
-        gigsByStation={gigsByStation}
-        STATIONS={STATIONS}
-        getStationTotal={getStationTotal}
-        getStationAverage={getStationAverage}
-        getColumnTotal={getColumnTotal}
-        getGrandTotal={getGrandTotal}
-        getGrandAverage={getGrandAverage}
-        getGigCount={getGigCount}
-        trucksWithData={trucksWithData}
-      />
+  isOpen={showPrintModal}
+  onClose={() => setShowPrintModal(false)}
+  tableData={{ trucks, weekStarting, gigsByStation }}
+  barChartData={barChartData}
+  pieChartData={pieChartData}
+  stackedBarData={stackedBarData}
+  areaChartData={areaChartData}
+  avgDPUData={avgDPUData}
+  trucks={trucks}
+  weekStarting={weekStarting}
+  gigsByStation={gigsByStation}
+  STATIONS={STATIONS}
+  getStationTotal={getStationTotal}
+  getStationAverage={getStationAverage}
+  getColumnTotal={getColumnTotal}
+  getGrandTotal={getGrandTotal}
+  getGrandAverage={getGrandAverage}
+  getGigCount={getGigCount}
+  trucksWithData={trucksWithData}
+  weeklyComparisonData={weeklyComparisonData}
+  threeWeeksChartData={threeWeeksChartData}
+  twoWeeksChartData={twoWeeksChartData}
+/>
     </div>
   );
 }

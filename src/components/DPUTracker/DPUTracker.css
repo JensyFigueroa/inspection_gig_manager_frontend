@@ -620,6 +620,28 @@ body {
   background: #4f46e5;
 }
 
+/* Estilos para gráficas de comparación */
+.chart-card[style*="grid-column: span 2"] {
+  width: 100%;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-card[style*="grid-column: span 2"] {
+    grid-column: span 1 !important;
+  }
+}
+
+
 
 
 /* Responsive */

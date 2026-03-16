@@ -215,14 +215,11 @@ const salesEng = gigs.find(
   }
 
   return (
-    <div className={styles.appContainer}>
-      <div className={styles.sidebar}>
+    <div className="flex">
         <Sidebar user={user}/>
-      </div>
-
-      <div className="flex-1 ml-54 p-8 lg:p-12 bg-gray-50 min-h-screen">
-        {/* Header - Responsivo */}
-        <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    
+      <div className="flex-1 ml-64 p-8 lg:p-12 bg-gray-50 min-h-screen">
+        <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="font-heading font-black text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-slate-900 mb-2">
               QUALITY DEPARTMENT INSPECTION SHEET
@@ -307,17 +304,17 @@ const salesEng = gigs.find(
                       className="table-row fade-in-up"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <td className="p-4 font-mono text-sm font-bold text-slate-900">{index + 1}</td>
-                      <td className="p-4 font-mono text-sm font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 font-mono text-sm font-bold text-slate-900">{index + 1}</td>
+                      <td className="p-1 font-mono text-sm font-bold text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.truckNumber}
                       </td>                  
-                      <td className="p-4 font-mono text-sm font-medium text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 font-mono text-sm font-medium text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.station}
                       </td>
-                      <td className="px-2 sm:px-4 py-2 break-wordsp-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-4 px-2 sm:px-4 py-2 break-words p-1 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.description.length > 200 ? `${gig.description.substring(0, 200)}...` : gig.description}
                       </td>
-                      <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <td className="p-1" onClick={(e) => e.stopPropagation()}>
                         {gig.photos && gig.photos.length > 0 ? (
                           <button
                             onClick={(e) => handlePhotoClick(gig.photos[0], e)}
@@ -335,24 +332,24 @@ const salesEng = gigs.find(
                           </div>
                         )}
                       </td>
-                      <td className="p-4 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
                         <span className={getStatusBadgeClass(gig.status)}>
                           {getStatusText(gig.status)}
                         </span>
                       </td>
-                      <td className="p-4 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.inspectionStatus === 'approved' && 
                           <span className={getStatusBadgeClass(gig.inspectionStatus)}>APPROVED</span>
                         }
                       </td>
-                      <td className="p-4 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.inspectionStatus === 'rejected' && 
                           <span className={getStatusBadgeClass(gig.inspectionStatus)}>
                             <Star className="w-6 h-6 text-red-500 fill-yellow-500" />
                           </span>
                         }  
                       </td>
-                      <td className="p-4 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {comments.filter(comment => comment.gigId === gig._id).length > 0 ? (
                           <span className="text-sm text-slate-600">
                             <i className="bi bi-chat-text-fill fs-2 text-primary"></i>
@@ -361,7 +358,7 @@ const salesEng = gigs.find(
                           <span className="text-sm text-slate-400"></span>
                         )}
                       </td>
-                      <td className="p-4" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
+                      <td className="p-1" onClick={user.role === 'qc' ? () => navigate(`/gig/${gig._id}`) : null}>
                         {user.role === 'lead' ? (
                           <select 
                             className="input-field text-sm min-w-[120px]" 
@@ -383,10 +380,10 @@ const salesEng = gigs.find(
                           </span>
                         )}
                       </td>
-                      <td className="p-4 font-body text-sm text-slate-600 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="p-1 font-body text-sm text-slate-600 cursor-pointer" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {users.find(u => u._id === gig.inspectorId)?.fullName || ''}
                       </td>
-                      <td className="p-4">
+                      <td className="p-1">
                         <div className="flex justify-center gap-2 flex-wrap">
                           {/* Buttons for Worker and Lead */}
                           {(user.role === 'worker' || user.role === 'lead') && (
@@ -525,7 +522,7 @@ const salesEng = gigs.find(
       {/* Photo Preview Modal */}
       {photoPreview && (
         <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-1"
           onClick={() => setPhotoPreview(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh]">

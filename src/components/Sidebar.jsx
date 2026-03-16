@@ -81,16 +81,23 @@ export default function Sidebar({ user }) {
           p-4 lg:p-6
         `}
       >
-        <div className="mb-6 lg:mb-12 pt-12 lg:pt-0">
-          <div className="flex items-center gap-2 mb-6 lg:mb-10">
-            <div className="logo-cell w-16 h-12 lg:w-20 lg:h-16 bg-transparent">
+        <div className="mb-12">
+        <div className="flex items-center gap-2 mb-10">
+          {/* <Shield size={28} className="text-[#FF5722]" /> */}
+          <div className="flex items-center gap-2">
+            <div className="logo-cell w-26 h-20 bg-transparent">
               <img src={logoRev} alt="" className='w-full h-full object-contain' />
-            </div>
-            <h1 className="font-heading font-black text-base lg:text-xl uppercase tracking-tight leading-none">
+            <h1 className="font-heading font-black text-xl uppercase tracking-tight leading-none">
               GigManager
             </h1>
+            </div>
+          </div>
+          <div>
+
           </div>
         </div>
+        
+      </div>
 
         <nav className="mb-6 lg:mb-12">
           {menuItems.map((item) => {

@@ -274,22 +274,22 @@ const salesEng = gigs.find(
           </div>
 
           {/* Table Container - Responsivo con scroll horizontal */}
-          <div className="table-container overflow-x-auto">
-            <table className="w-full min-w-[900px] table-fixed border-collapse">
-              <thead>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[900px] border-collapse">
+              <thead className="sticky top-0 bg-gray-100 z-10">
                 <tr>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Items #</th>                
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Work Order #</th>                
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Station</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Description</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Photo</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Status</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Pass</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Fail</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Comments</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Operator</th>
-                  <th className="table-header text-xs text-left px-4 py-3 whitespace-nowrap">Inspector</th>
-                  <th className="table-header text-center px-12 py-6 whitespace-nowrap">Actions</th>                
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Items #</th>                
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Work Order #</th>                
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Station</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Description</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Photo</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Status</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Pass</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Fail</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Comments</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Operator</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Inspector</th>
+                  <th className="text-[10px] sm:text-xs md:text-sm text-center px-2 sm:px-4 py-2 sm:py-3">Actions</th>                
                 </tr>
               </thead>
               <tbody>
@@ -314,7 +314,7 @@ const salesEng = gigs.find(
                       <td className="p-4 font-mono text-sm font-medium text-slate-900 cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.station}
                       </td>
-                      <td className="p-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
+                      <td className="px-2 sm:px-4 py-2 break-wordsp-4 font-body text-sm text-slate-800 whitespace-normal break-words max-w-xs cursor-pointer hover:text-blue-600" onClick={() => navigate(`/gig/${gig._id}`)}>
                         {gig.description.length > 200 ? `${gig.description.substring(0, 200)}...` : gig.description}
                       </td>
                       <td className="p-4" onClick={(e) => e.stopPropagation()}>
